@@ -1,0 +1,1 @@
+{"kind":"event","request_id":"1840300000000000601","app":"1100250925#demo","endpoint_id":"1840200000000000007","sent_at":"2026-09-28T08:00:01.020Z","events":[{"id":"1840299999999990002","type":"user.status_changed","occurred_at":"2026-09-28T08:00:00.512Z","attempt":1,"test":false,"data":{"origin":"server","username":"zhangsan","status":"disabled"}}]}

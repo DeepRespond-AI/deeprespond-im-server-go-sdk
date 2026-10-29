@@ -1,0 +1,7 @@
+*.go.broken
+*.test
+*.out
+*.exe
+/demo/demo
+/artifacts/
+.env

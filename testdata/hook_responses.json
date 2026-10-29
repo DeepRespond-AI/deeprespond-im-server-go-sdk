@@ -1,0 +1,1087 @@
+[
+  {
+    "name": "message_allow",
+    "hook": "message.before_send",
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "message_reject",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "forbidden_word",
+      "message": "消息中有不允许的内容"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "message_modify",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": true,
+    "reason": "modify 适用于两种发消息前回调"
+  },
+  {
+    "name": "message_partial",
+    "hook": "message.before_send",
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "partial 只适用于 group.before_join 的 invite、create"
+  },
+  {
+    "name": "chatroom_allow",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "chatroom_reject",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "forbidden_word",
+      "message": "消息中有不允许的内容"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "chatroom_modify",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": true,
+    "reason": "modify 适用于两种发消息前回调"
+  },
+  {
+    "name": "chatroom_partial",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "partial 只适用于 group.before_join 的 invite、create"
+  },
+  {
+    "name": "friend_allow",
+    "hook": "friend.before_add",
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "friend_reject",
+    "hook": "friend.before_add",
+    "response": {
+      "action": "reject",
+      "reason": "forbidden_word",
+      "message": "消息中有不允许的内容"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "friend_modify",
+    "hook": "friend.before_add",
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": false,
+    "reason": "modify 只适用于 message.before_send、chatroom.before_send"
+  },
+  {
+    "name": "friend_partial",
+    "hook": "friend.before_add",
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "partial 只适用于 group.before_join 的 invite、create"
+  },
+  {
+    "name": "group_create_allow",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "group_create_reject",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "reject",
+      "reason": "not_same_org",
+      "message": "只能加入本公司的群"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "group_create_modify",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": false,
+    "reason": "modify 只适用于两种发消息前回调"
+  },
+  {
+    "name": "group_create_partial",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ]
+    },
+    "valid": true,
+    "reason": "partial 适用于 joined_via 为 create、invite 的 group.before_join"
+  },
+  {
+    "name": "group_invite_allow",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "group_invite_reject",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "reject",
+      "reason": "not_same_org",
+      "message": "只能加入本公司的群"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "group_invite_modify",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": false,
+    "reason": "modify 只适用于两种发消息前回调"
+  },
+  {
+    "name": "group_invite_partial",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ]
+    },
+    "valid": true,
+    "reason": "partial 适用于 joined_via 为 create、invite 的 group.before_join"
+  },
+  {
+    "name": "group_apply_allow",
+    "hook": "group.before_join",
+    "joined_via": "apply",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "group_apply_reject",
+    "hook": "group.before_join",
+    "joined_via": "apply",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "reject",
+      "reason": "not_same_org",
+      "message": "只能加入本公司的群"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "group_apply_modify",
+    "hook": "group.before_join",
+    "joined_via": "apply",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": false,
+    "reason": "modify 只适用于两种发消息前回调"
+  },
+  {
+    "name": "group_apply_partial",
+    "hook": "group.before_join",
+    "joined_via": "apply",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "zhaoliu"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "joined_via 为 apply 时不能返回 partial"
+  },
+  {
+    "name": "group_link_allow",
+    "hook": "group.before_join",
+    "joined_via": "link",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "allow"
+    },
+    "valid": true,
+    "reason": "allow 适用于全部同步回调"
+  },
+  {
+    "name": "group_link_reject",
+    "hook": "group.before_join",
+    "joined_via": "link",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "reject",
+      "reason": "not_same_org",
+      "message": "只能加入本公司的群"
+    },
+    "valid": true,
+    "reason": "reject 适用于全部同步回调"
+  },
+  {
+    "name": "group_link_modify",
+    "hook": "group.before_join",
+    "joined_via": "link",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "已替换的内容"
+      }
+    },
+    "valid": false,
+    "reason": "modify 只适用于两种发消息前回调"
+  },
+  {
+    "name": "group_link_partial",
+    "hook": "group.before_join",
+    "joined_via": "link",
+    "request_targets": [
+      "zhaoliu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "zhaoliu"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "joined_via 为 link 时不能返回 partial"
+  },
+  {
+    "name": "action_unknown",
+    "hook": "message.before_send",
+    "response": {
+      "action": "deny"
+    },
+    "valid": false,
+    "reason": "不认识的 action"
+  },
+  {
+    "name": "action_uppercase",
+    "hook": "message.before_send",
+    "response": {
+      "action": "ALLOW"
+    },
+    "valid": false,
+    "reason": "action 区分大小写"
+  },
+  {
+    "name": "action_missing",
+    "hook": "message.before_send",
+    "response": {
+      "reason": "forbidden_word"
+    },
+    "valid": false,
+    "reason": "缺少 action"
+  },
+  {
+    "name": "action_null",
+    "hook": "message.before_send",
+    "response": {
+      "action": null
+    },
+    "valid": false,
+    "reason": "action 为 null"
+  },
+  {
+    "name": "unknown_fields_ignored",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "spam",
+      "trace_id": "abc",
+      "extra": {
+        "k": 1
+      }
+    },
+    "valid": true,
+    "reason": "不认识的其他字段忽略"
+  },
+  {
+    "name": "reason_absent",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject"
+    },
+    "valid": true,
+    "reason": "reason、message 都可以不给"
+  },
+  {
+    "name": "reason_null",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": null
+    },
+    "valid": true,
+    "reason": "reason 为 null 与不给相同"
+  },
+  {
+    "name": "reason_empty",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": ""
+    },
+    "valid": false,
+    "reason": "reason 给出时为 1 到 64 个字符，空字符串不合规（SDK 的 Reject 把空字符串当作不给，序列化时省略）"
+  },
+  {
+    "name": "reason_64_chars",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "valid": true,
+    "reason": "reason 64 个字符"
+  },
+  {
+    "name": "reason_65_chars",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "valid": false,
+    "reason": "reason 超过 64 个字符"
+  },
+  {
+    "name": "reason_uppercase",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "Forbidden_Word"
+    },
+    "valid": false,
+    "reason": "reason 只能是小写字母、数字和 _ . -"
+  },
+  {
+    "name": "reason_punctuation",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "a.b-c_d"
+    },
+    "valid": true,
+    "reason": "reason 可以有 . - _"
+  },
+  {
+    "name": "reason_digits_only",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "403"
+    },
+    "valid": true,
+    "reason": "reason 可以只有数字"
+  },
+  {
+    "name": "reason_space",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "forbidden word"
+    },
+    "valid": false,
+    "reason": "reason 不能有空格"
+  },
+  {
+    "name": "reason_non_ascii",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": "违规"
+    },
+    "valid": false,
+    "reason": "reason 不能有中文"
+  },
+  {
+    "name": "reason_not_string",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "reason": 403
+    },
+    "valid": false,
+    "reason": "reason 不是字符串"
+  },
+  {
+    "name": "message_null",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": null
+    },
+    "valid": true,
+    "reason": "message 为 null 与不给相同"
+  },
+  {
+    "name": "message_empty",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": ""
+    },
+    "valid": true,
+    "reason": "message 为空字符串合规（服务端改用默认提示）"
+  },
+  {
+    "name": "message_256_ascii",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    },
+    "valid": true,
+    "reason": "message 256 个字符"
+  },
+  {
+    "name": "message_257_ascii",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    },
+    "valid": false,
+    "reason": "message 超过 256 个字符"
+  },
+  {
+    "name": "message_256_cjk",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁"
+    },
+    "valid": true,
+    "reason": "256 个汉字（768 字节）：按字符而不是字节计"
+  },
+  {
+    "name": "message_257_cjk",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁"
+    },
+    "valid": false,
+    "reason": "257 个汉字"
+  },
+  {
+    "name": "message_256_emoji",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": true,
+    "reason": "256 个 U+1F600（UTF-16 为 512 个单元）：按 Unicode 码点计，不按 UTF-16 单元计"
+  },
+  {
+    "name": "message_257_emoji",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    },
+    "valid": false,
+    "reason": "257 个 U+1F600"
+  },
+  {
+    "name": "message_newline",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "第一行\n第二行"
+    },
+    "valid": false,
+    "reason": "换行是控制字符"
+  },
+  {
+    "name": "message_tab",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "名称\t说明"
+    },
+    "valid": false,
+    "reason": "制表符是控制字符"
+  },
+  {
+    "name": "message_del",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "abc\u007f"
+    },
+    "valid": false,
+    "reason": "U+007F 是控制字符"
+  },
+  {
+    "name": "message_c1_control",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "abc\u0085"
+    },
+    "valid": false,
+    "reason": "U+0085（C1 控制字符）是控制字符"
+  },
+  {
+    "name": "message_line_separator",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": "abc\u2028def"
+    },
+    "valid": true,
+    "reason": "U+2028 不是控制字符（Unicode 类别 Zl，只有类别 Cc 算控制字符）"
+  },
+  {
+    "name": "message_not_string",
+    "hook": "message.before_send",
+    "response": {
+      "action": "reject",
+      "message": 1
+    },
+    "valid": false,
+    "reason": "message 不是字符串"
+  },
+  {
+    "name": "modify_body_only",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "改过的"
+      }
+    },
+    "valid": true,
+    "reason": "只改 body，ext 保持不变"
+  },
+  {
+    "name": "modify_ext_only",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "ext": {
+        "k": "v"
+      }
+    },
+    "valid": true,
+    "reason": "只改 ext，body 保持不变"
+  },
+  {
+    "name": "modify_ext_null",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "ext": null
+    },
+    "valid": true,
+    "reason": "ext 为 null 表示去掉 ext"
+  },
+  {
+    "name": "modify_body_and_ext",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "modify",
+      "body": {
+        "text": "改过的"
+      },
+      "ext": null
+    },
+    "valid": true,
+    "reason": "同时改 body 和去掉 ext"
+  },
+  {
+    "name": "modify_neither",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify"
+    },
+    "valid": false,
+    "reason": "modify 至少要给出 body 或 ext"
+  },
+  {
+    "name": "modify_body_null",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": null
+    },
+    "valid": false,
+    "reason": "body 不能为 null"
+  },
+  {
+    "name": "modify_body_array",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": [
+        {
+          "text": "x"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "body 应为 JSON 对象"
+  },
+  {
+    "name": "modify_body_string",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": "text"
+    },
+    "valid": false,
+    "reason": "body 应为 JSON 对象"
+  },
+  {
+    "name": "modify_body_empty_object",
+    "hook": "message.before_send",
+    "response": {
+      "action": "modify",
+      "body": {}
+    },
+    "valid": true,
+    "reason": "空对象是 JSON 对象，响应合规；之后由消息模块按正常规则校验内容"
+  },
+  {
+    "name": "modify_ext_array",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "modify",
+      "ext": []
+    },
+    "valid": false,
+    "reason": "ext 应为 JSON 对象或 null"
+  },
+  {
+    "name": "modify_ext_string",
+    "hook": "chatroom.before_send",
+    "response": {
+      "action": "modify",
+      "ext": "x"
+    },
+    "valid": false,
+    "reason": "ext 应为 JSON 对象或 null"
+  },
+  {
+    "name": "partial_one_of_two",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "wangwu",
+          "reason": "not_same_org",
+          "message": "不是本公司的员工"
+        }
+      ]
+    },
+    "valid": true,
+    "reason": "拒绝 targets 中的一个人，带 reason 和 message"
+  },
+  {
+    "name": "partial_all",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        },
+        {
+          "username": "wangwu"
+        }
+      ]
+    },
+    "valid": true,
+    "reason": "拒绝全部 targets"
+  },
+  {
+    "name": "partial_empty",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": []
+    },
+    "valid": false,
+    "reason": "partial 至少一项"
+  },
+  {
+    "name": "partial_missing_rejected",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial"
+    },
+    "valid": false,
+    "reason": "partial 缺少 rejected"
+  },
+  {
+    "name": "partial_rejected_object",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": {
+        "username": "lisi"
+      }
+    },
+    "valid": false,
+    "reason": "rejected 应为数组"
+  },
+  {
+    "name": "partial_not_in_targets",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "zhaoliu"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "用户名必须在请求的 targets 中"
+  },
+  {
+    "name": "partial_username_case",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "LISI"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "用户名按原样比较，不忽略大小写"
+  },
+  {
+    "name": "partial_missing_username",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "reason": "spam"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "每项都要有 username"
+  },
+  {
+    "name": "partial_item_reason_uppercase",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi",
+          "reason": "Spam"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "每项的 reason 规则与 reject 相同"
+  },
+  {
+    "name": "partial_item_reason_empty",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi",
+          "reason": ""
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "每项的 reason 给出时不能为空字符串"
+  },
+  {
+    "name": "partial_item_message_newline",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi",
+          "message": "a\nb"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "每项的 message 规则与 reject 相同"
+  },
+  {
+    "name": "partial_item_message_257",
+    "hook": "group.before_join",
+    "joined_via": "create",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi",
+          "message": "禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁禁"
+        }
+      ]
+    },
+    "valid": false,
+    "reason": "每项的 message 最长 256 个字符"
+  },
+  {
+    "name": "response_65536_bytes",
+    "hook": "message.before_send",
+    "response": {
+      "action": "allow",
+      "pad": ""
+    },
+    "size_bytes": 65536,
+    "note": "把 pad 填充为若干个 a，使紧凑编码（无空白）的整个响应体正好为 size_bytes 字节；上限为 65536 字节",
+    "valid": true,
+    "reason": "响应体正好 64 KB（65536 字节）"
+  },
+  {
+    "name": "response_65537_bytes",
+    "hook": "message.before_send",
+    "response": {
+      "action": "allow",
+      "pad": ""
+    },
+    "size_bytes": 65537,
+    "note": "把 pad 填充为若干个 a，使紧凑编码（无空白）的整个响应体正好为 size_bytes 字节；上限为 65536 字节",
+    "valid": false,
+    "reason": "响应体超过 64 KB"
+  },
+  {
+    "name": "response_65537_bytes_group",
+    "hook": "group.before_join",
+    "joined_via": "invite",
+    "request_targets": [
+      "lisi",
+      "wangwu"
+    ],
+    "response": {
+      "action": "partial",
+      "rejected": [
+        {
+          "username": "lisi"
+        }
+      ],
+      "pad": ""
+    },
+    "size_bytes": 65537,
+    "note": "把 pad 填充为若干个 a，使紧凑编码（无空白）的整个响应体正好为 size_bytes 字节；上限为 65536 字节",
+    "valid": false,
+    "reason": "响应体超过 64 KB，内容本身合规也不行"
+  }
+]

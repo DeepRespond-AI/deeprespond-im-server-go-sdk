@@ -1,0 +1,31 @@
+{
+  "channel": {
+    "channel_id": "Demo",
+    "channel_uid": "11",
+    "name": "会议",
+    "media": "video",
+    "access_mode": "open",
+    "default_role": "publisher",
+    "status": "open",
+    "max_participants": 4,
+    "seat_count": 0,
+    "joined_count": 0,
+    "media_state": "idle",
+    "generation": 0,
+    "version": 1,
+    "members_version": 1,
+    "ext": {
+      "nested": {
+        "number": 1
+      }
+    },
+    "expires_at": null,
+    "media_observed_at": null,
+    "created_at": "2026-10-09T08:00:00.000Z",
+    "updated_at": "2026-10-09T08:00:00.000Z",
+    "closing_at": null,
+    "closed_at": null,
+    "close_reason": "",
+    "close_note": ""
+  }
+}

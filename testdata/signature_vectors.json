@@ -1,0 +1,202 @@
+[
+  {
+    "name": "docs_example",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141598,
+    "valid": true,
+    "reason": "对外文档（web/docsweb/docs/server/callback/security.md）的示例：URL 验证请求，213 字节"
+  },
+  {
+    "name": "multibyte_html_body",
+    "secret": "cbs_hMYEDt5U-ipPTrCa7UoH9wv79aXZRxCmiQRDgEBNJgw",
+    "timestamp": "1791141600",
+    "nonce": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "body_b64": "eyJraW5kIjoiZXZlbnQiLCJyZXF1ZXN0X2lkIjoiMTg0MDMwMDAwMDAwMDAwMDgwMCIsImFwcCI6IjExMDAyNTA5MjUjZGVtbyIsImVuZHBvaW50X2lkIjoiMTg0MDIwMDAwMDAwMDAwMDAwNyIsInNlbnRfYXQiOiIyMDI2LTEwLTA0VDE5OjIwOjAwLjAyMFoiLCJldmVudHMiOlt7ImlkIjoiMTg0MDI5OTk5OTk5OTk5MjAwMSIsInR5cGUiOiJtZXNzYWdlLnNlbnQiLCJvY2N1cnJlZF9hdCI6IjIwMjYtMDktMjhUMDg6MDA6MDAuNTEyWiIsImF0dGVtcHQiOjEsInRlc3QiOmZhbHNlLCJkYXRhIjp7Im9yaWdpbiI6ImNsaWVudCIsImNvbnZlcnNhdGlvbl9pZCI6IjE4NDAwOTg3NjU0MzIxMDEiLCJjb252ZXJzYXRpb25fdHlwZSI6InNpbmdsZSIsInNlcSI6MzU3LCJtZXNzYWdlX2lkIjoiMTg0MDEyMDAzMzQ0NTU2Njc3OCIsImNsaWVudF9tc2dfaWQiOiI0YjlmMmMxZS04ZDNhLTRmN2ItYTJjNi05ZTFkNWYzYjdhMDgiLCJzZW5kZXJfdXNlcm5hbWUiOiJ6aGFuZ3NhbiIsInNlbmRlcl90eXBlIjoidXNlciIsInJlY2lwaWVudF91c2VybmFtZSI6Imxpc2kiLCJncm91cF9pZCI6bnVsbCwidHlwZSI6ImN1c3RvbSIsImJvZHkiOnsidGV4dCI6IjxiPuS9oOWlvTwvYj4gJiBcIuW8leWPt1wiIPCfmIAgYTxiPmMifSwiZXh0IjpudWxsLCJtZW50aW9uX3VzZXJuYW1lcyI6W10sIm1lbnRpb25fYWxsIjpmYWxzZSwicmVwbHlfc2VxIjpudWxsLCJuZWVkX3JlY2VpcHQiOmZhbHNlLCJleGNsdWRlX2Zyb21fdW5yZWFkIjpmYWxzZSwidmlhIjoiY2xpZW50IiwiY3JlYXRlZF9hdCI6IjIwMjYtMDktMjhUMDg6MDA6MDAuNTEyWiIsImNvbnRlbnRfYXZhaWxhYmxlIjp0cnVlfX1dfQ==",
+    "expected": "v1=ad930d283a9e9f7478a02208b5242032a3637ec0b0a1cd4445987a22fa44879c",
+    "now": 1791141600,
+    "valid": true,
+    "reason": "事件请求体中有汉字、表情和不转义的 <>&：签名按原始字节计算"
+  },
+  {
+    "name": "two_signatures_old_secret_configured",
+    "secret": "cbs_H12F_317EerZFqcxUBYGdozmg-vYcs3bnRwLkaidZkI",
+    "signing_secrets": [
+      "cbs_hMYEDt5U-ipPTrCa7UoH9wv79aXZRxCmiQRDgEBNJgw",
+      "cbs_H12F_317EerZFqcxUBYGdozmg-vYcs3bnRwLkaidZkI"
+    ],
+    "timestamp": "1791141700",
+    "nonce": "8c7d1e2f3a4b5c6d7e8f9a0b1c2d3e4f",
+    "body_b64": "eyJraW5kIjoiaG9vayIsImhvb2siOiJtZXNzYWdlLmJlZm9yZV9zZW5kIiwicmVxdWVzdF9pZCI6IjE4NDAzMDAwMDAwMDAwMDA4MDEiLCJhcHAiOiIxMTAwMjUwOTI1I2RlbW8iLCJlbmRwb2ludF9pZCI6IjE4NDAyMDAwMDAwMDAwMDAwMDciLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToyMTo0MC4wMjBaIiwidGltZW91dF9tcyI6ODAwLCJ0ZXN0IjpmYWxzZSwiZGF0YSI6eyJ2aWEiOiJjbGllbnQiLCJjbGllbnRfbXNnX2lkIjoiNGI5ZjJjMWUtOGQzYS00ZjdiLWEyYzYtOWUxZDVmM2I3YTA4IiwiY29udmVyc2F0aW9uX3R5cGUiOiJncm91cCIsInNlbmRlcl91c2VybmFtZSI6InpoYW5nc2FuIiwicmVjaXBpZW50X3VzZXJuYW1lIjpudWxsLCJyZWNpcGllbnRfdXNlcm5hbWVzIjpudWxsLCJncm91cF9pZCI6IjE4NDAwMTIzNDU2Nzg5MDEiLCJ0eXBlIjoidGV4dCIsImJvZHkiOnsidGV4dCI6IuaYjuWkqeS4iuWNiOWNgeeCueivhOWuoSBA5p2O5ZubIn0sImV4dCI6bnVsbCwibWVudGlvbl91c2VybmFtZXMiOlsibGlzaSJdLCJtZW50aW9uX2FsbCI6ZmFsc2UsInJlcGx5X3NlcSI6MTAxOSwibmVlZF9yZWNlaXB0Ijp0cnVlLCJvbmxpbmVfb25seSI6ZmFsc2UsImVkaXQiOm51bGx9fQ==",
+    "expected": "v1=abe1d7ccd0c55aebf73df45679ababbed89a9d7c14c6cb606ec6d21b63298575,v1=43e94aa7db8f3ff45395556a72465bafe99dd8d3e0fbcb2a6203713233fd97ae",
+    "now": 1791141700,
+    "valid": true,
+    "reason": "轮换宽限期内为新旧两个签名（新的在前），接收端只配置了旧密钥：第二项匹配即通过"
+  },
+  {
+    "name": "two_signatures_new_secret_configured",
+    "secret": "cbs_hMYEDt5U-ipPTrCa7UoH9wv79aXZRxCmiQRDgEBNJgw",
+    "signing_secrets": [
+      "cbs_hMYEDt5U-ipPTrCa7UoH9wv79aXZRxCmiQRDgEBNJgw",
+      "cbs_H12F_317EerZFqcxUBYGdozmg-vYcs3bnRwLkaidZkI"
+    ],
+    "timestamp": "1791141700",
+    "nonce": "8c7d1e2f3a4b5c6d7e8f9a0b1c2d3e4f",
+    "body_b64": "eyJraW5kIjoiaG9vayIsImhvb2siOiJtZXNzYWdlLmJlZm9yZV9zZW5kIiwicmVxdWVzdF9pZCI6IjE4NDAzMDAwMDAwMDAwMDA4MDEiLCJhcHAiOiIxMTAwMjUwOTI1I2RlbW8iLCJlbmRwb2ludF9pZCI6IjE4NDAyMDAwMDAwMDAwMDAwMDciLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToyMTo0MC4wMjBaIiwidGltZW91dF9tcyI6ODAwLCJ0ZXN0IjpmYWxzZSwiZGF0YSI6eyJ2aWEiOiJjbGllbnQiLCJjbGllbnRfbXNnX2lkIjoiNGI5ZjJjMWUtOGQzYS00ZjdiLWEyYzYtOWUxZDVmM2I3YTA4IiwiY29udmVyc2F0aW9uX3R5cGUiOiJncm91cCIsInNlbmRlcl91c2VybmFtZSI6InpoYW5nc2FuIiwicmVjaXBpZW50X3VzZXJuYW1lIjpudWxsLCJyZWNpcGllbnRfdXNlcm5hbWVzIjpudWxsLCJncm91cF9pZCI6IjE4NDAwMTIzNDU2Nzg5MDEiLCJ0eXBlIjoidGV4dCIsImJvZHkiOnsidGV4dCI6IuaYjuWkqeS4iuWNiOWNgeeCueivhOWuoSBA5p2O5ZubIn0sImV4dCI6bnVsbCwibWVudGlvbl91c2VybmFtZXMiOlsibGlzaSJdLCJtZW50aW9uX2FsbCI6ZmFsc2UsInJlcGx5X3NlcSI6MTAxOSwibmVlZF9yZWNlaXB0Ijp0cnVlLCJvbmxpbmVfb25seSI6ZmFsc2UsImVkaXQiOm51bGx9fQ==",
+    "expected": "v1=abe1d7ccd0c55aebf73df45679ababbed89a9d7c14c6cb606ec6d21b63298575,v1=43e94aa7db8f3ff45395556a72465bafe99dd8d3e0fbcb2a6203713233fd97ae",
+    "now": 1791141700,
+    "valid": true,
+    "reason": "轮换宽限期内为新旧两个签名，接收端已配置新密钥：第一项匹配即通过"
+  },
+  {
+    "name": "unknown_v2_item",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "signature_header": "v2=abababababababababababababababababababababababababababababababab,v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141598,
+    "valid": true,
+    "reason": "忽略不认识的版本 v2=，其后的 v1= 匹配即通过"
+  },
+  {
+    "name": "timestamp_300s_old",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141898,
+    "valid": true,
+    "reason": "时间戳与当前时间相差 300 秒（不超过 5 分钟）"
+  },
+  {
+    "name": "wrong_secret",
+    "secret": "cbs_hMYEDt5U-ipPTrCa7UoH9wv79aXZRxCmiQRDgEBNJgw",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=80d1da460b119b7d3ccfa68da8dedb16dbe5cffafd8c06ba09f8a4e8d01b881b",
+    "signature_header": "v1=66963c29fbf6b6df9272ffe7861f89716793d533d690e73d734c5e430c181afe",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_signature",
+    "reason": "签名是用另一个密钥计算的"
+  },
+  {
+    "name": "timestamp_leading_zero",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "01791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=765b26c50c6aee70e85b764720531083747f9687ccdd1a80c361dba26ff2a750",
+    "signature_header": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_signature",
+    "reason": "签名串用请求头的原始字符串 01791141598，而签名是按 1791141598 计算的；先转为整数再格式化的实现会错误地通过"
+  },
+  {
+    "name": "timestamp_plus_sign",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "+1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=76609b6ebdfe22b7f8536910ca32cd42e8de26a4fa36b13a3264fdc459110880",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_timestamp",
+    "reason": "时间戳不是纯数字（签名按原始字符串计算、本身是对的；Go 的 strconv.ParseInt 接受 + 号，不能只靠它判断）"
+  },
+  {
+    "name": "timestamp_decimal",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598.5",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=96584133765b8cb4764caaf8392fd60d0f864af7666507d76c7c13318cc1bf5c",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_timestamp",
+    "reason": "时间戳不是纯数字（签名按原始字符串计算、本身是对的）"
+  },
+  {
+    "name": "timestamp_stale",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141899,
+    "valid": false,
+    "error": "stale_timestamp",
+    "reason": "时间戳比当前时间早 301 秒（超过 5 分钟）"
+  },
+  {
+    "name": "timestamp_future",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141297,
+    "valid": false,
+    "error": "stale_timestamp",
+    "reason": "时间戳比当前时间晚 301 秒（超过 5 分钟）"
+  },
+  {
+    "name": "nonce_31_chars",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e318",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=b5561d828af3e5f64339a9886b6efe16cb14a80588fee5fba315d7cf39bdc60c",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_format",
+    "reason": "随机数不是 32 个十六进制字符（签名按这个随机数计算、本身是对的）"
+  },
+  {
+    "name": "body_modified_one_byte",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSzlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=fc745715d3911d8ec5e682bb06c6b0169712a8ee111cbb4ce12d875975f3fc6f",
+    "signature_header": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_signature",
+    "reason": "请求体改了一个字节（challenge 的第一个字符 J 改为 K），签名是按原请求体计算的"
+  },
+  {
+    "name": "signature_uppercase_hex",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "signature_header": "v1=2E5CEBE9C6C67AF85D62C4CC0250579223ACC3E89549EABF036D3C523CB08610",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_signature",
+    "reason": "签名是大写十六进制：按字符串比较，只认小写"
+  },
+  {
+    "name": "only_unknown_version",
+    "secret": "cbs_oSi8UFoUx4RQ8TlhuDzI06dQGntx4oJ6dOaloTrcCCE",
+    "timestamp": "1791141598",
+    "nonce": "c90a695d9294c5f757dd88350e0e3187",
+    "body_b64": "eyJraW5kIjoidmVyaWZ5IiwicmVxdWVzdF9pZCI6IjEwMDMxMDk2NjYyOTA0MDEyOCIsImFwcCI6IjYxOTUyOTUxNDMjZG9jLWNhbGxiYWNrIiwiZW5kcG9pbnRfaWQiOiIxMDAzMTA5NjY1NTc3MzY5NjAiLCJzZW50X2F0IjoiMjAyNi0xMC0wNFQxOToxOTo1OC4xMzJaIiwiY2hhbGxlbmdlIjoiSjlLa19oS3BfSDc0WlNjem5HU3pVXy1rTDhiNHIxTVRBQ216VEZzTlZQNCJ9",
+    "expected": "v1=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "signature_header": "v2=2e5cebe9c6c67af85d62c4cc0250579223acc3e89549eabf036d3c523cb08610",
+    "now": 1791141598,
+    "valid": false,
+    "error": "bad_signature",
+    "reason": "只有不认识的版本 v2=（即使值与 v1 的签名相同），没有 v1="
+  }
+]

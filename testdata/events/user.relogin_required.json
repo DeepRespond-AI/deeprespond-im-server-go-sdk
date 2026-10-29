@@ -1,0 +1,1 @@
+{"kind":"event","request_id":"1840300000000000606","app":"1100250925#demo","endpoint_id":"1840200000000000007","sent_at":"2026-09-28T10:00:00.508Z","events":[{"id":"1840299999999990007","type":"user.relogin_required","occurred_at":"2026-09-28T10:00:00.000Z","attempt":1,"test":false,"data":{"origin":"server","sessions_revoked_before":"2026-09-28T10:00:00.000001Z"}}]}
