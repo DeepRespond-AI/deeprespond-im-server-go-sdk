@@ -26,6 +26,7 @@ type Client struct {
 	Calls         *CallsService
 	Channels      *ChannelsService
 	Presence      *PresenceService
+	AI            *AIService
 
 	t *transport
 }
@@ -133,6 +134,7 @@ func New(cfg Config) (*Client, error) {
 		Calls:         &CallsService{t: t},
 		Channels:      &ChannelsService{t: t},
 		Presence:      &PresenceService{t: t},
+		AI:            &AIService{t: t},
 		t:             t,
 	}, nil
 }

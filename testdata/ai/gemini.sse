@@ -1,0 +1,8 @@
+data: {"candidates":[{"content":{"parts":[{"text":"先想","thought":true}],"role":"model"},"index":0}],"modelVersion":"gemini-3-pro"}
+
+data: {"candidates":[{"content":{"parts":[{"text":"一想","thought":true}],"role":"model"},"index":0}],"modelVersion":"gemini-3-pro"}
+
+data: {"candidates":[{"content":{"parts":[{"text":"你好，"}],"role":"model"},"index":0}],"modelVersion":"gemini-3-pro"}
+
+data: {"candidates":[{"content":{"parts":[{"text":"**今天**晴。"}],"role":"model"},"finishReason":"STOP","index":0}],"usageMetadata":{"promptTokenCount":12,"candidatesTokenCount":34,"totalTokenCount":46},"modelVersion":"gemini-3-pro"}
+

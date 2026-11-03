@@ -4654,3 +4654,319 @@ func (s *PresenceService) Get(ctx context.Context, username string) (*Presence, 
 	}
 	return out, nil
 }
+
+// AIService AI 对话：机器人管理与流式回复（client.AI）；流式写入用 StartStream。
+type AIService struct {
+	t *transport
+}
+
+// CreateBot 创建机器人
+//
+// 在同一事务中创建 kind 为 bot 的 IM 用户和机器人配置，加好友方式设为 allow_any。用户名已存在返回 already_exists；
+// 应用的机器人数已达上限返回 limit_exceeded（app_bots）。机器人不能登录、不能入群。
+//
+// 接口：POST /ai/bots（ai.create_bot）。以唯一标识创建，可以自动重试；重试后得到 already_exists 时错误的 Retried 为真，可以按“前一次尝试已经创建”处理。
+func (s *AIService) CreateBot(ctx context.Context, username string, params CreateBotParams) (*AICreateBotResult, error) {
+	c := s.t.newCall(&endpoints.AICreateBot)
+	w := c.body()
+	c.require(username != "", "username")
+	w.beginObject()
+	w.key("username")
+	encStr(w, username)
+	if params.Nickname != "" {
+		w.key("nickname")
+		encStr(w, params.Nickname)
+	}
+	if params.AvatarURL != "" {
+		w.key("avatar_url")
+		encStr(w, params.AvatarURL)
+	}
+	if params.EndpointID != "" {
+		w.key("endpoint_id")
+		encStr(w, params.EndpointID)
+	}
+	if params.ContextMessages != nil {
+		w.key("context_messages")
+		encInt64(w, *params.ContextMessages)
+	}
+	if params.IdleTimeoutSeconds != nil {
+		w.key("idle_timeout_seconds")
+		encInt64(w, *params.IdleTimeoutSeconds)
+	}
+	if params.MaxActiveStreams != nil {
+		w.key("max_active_streams")
+		encInt64(w, *params.MaxActiveStreams)
+	}
+	if params.Description != "" {
+		w.key("description")
+		encStr(w, params.Description)
+	}
+	w.endObject()
+	out := new(AICreateBotResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ListBots 分页列出机器人
+//
+// 接口：GET /ai/bots（ai.list_bots）。查询，网络错误、超时、5xx 时自动重试。
+func (s *AIService) ListBots(ctx context.Context, params ListOptions) (*Page[Bot], error) {
+	c := s.t.newCall(&endpoints.AIListBots)
+	if params.Cursor != "" {
+		c.query("cursor", params.Cursor)
+	}
+	if params.Limit != 0 {
+		c.query("limit", strconv.Itoa(params.Limit))
+	}
+	out := new(Page[Bot])
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AllBots 逐项遍历 ListBots 的结果，自动翻页：按 next_cursor 是否为空判断结束，不按条数判断（一页可能为空而仍有下一页）。
+// 出错时产出这个错误后结束，已产出的项有效。
+func (s *AIService) AllBots(ctx context.Context, params ListOptions) iter.Seq2[Bot, error] {
+	return iterPages(ctx, params.Cursor, func(ctx context.Context, cursor string) ([]Bot, string, error) {
+		p := params
+		p.Cursor = cursor
+		page, err := s.ListBots(ctx, p)
+		if err != nil {
+			return nil, "", err
+		}
+		return page.Items, page.NextCursor, nil
+	})
+}
+
+// GetBot 查询机器人
+//
+// 用户不存在返回 not_found；用户不是机器人返回 invalid_argument（not_bot）。
+//
+// 接口：GET /ai/bots/{username}（ai.get_bot）。查询，网络错误、超时、5xx 时自动重试。
+func (s *AIService) GetBot(ctx context.Context, username string) (*AIGetBotResult, error) {
+	c := s.t.newCall(&endpoints.AIGetBot)
+	c.path("username", username)
+	out := new(AIGetBotResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UpdateBot 修改机器人的配置
+//
+// 带 version（版本号不一致返回 version_conflict）；昵称和头像用 IM 用户的接口修改。endpoint_id 为 null 表示改用订阅了 ai.message_received 的地址。
+//
+// 接口：PATCH /ai/bots/{username}（ai.update_bot）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) UpdateBot(ctx context.Context, username string, version int64, params UpdateBotParams) (*AIUpdateBotResult, error) {
+	c := s.t.newCall(&endpoints.AIUpdateBot)
+	c.path("username", username)
+	w := c.body()
+	w.beginObject()
+	w.key("version")
+	encInt64(w, version)
+	if params.EndpointID != nil {
+		w.key("endpoint_id")
+		encStr(w, *params.EndpointID)
+	}
+	if params.ContextMessages != nil {
+		w.key("context_messages")
+		encInt64(w, *params.ContextMessages)
+	}
+	if params.IdleTimeoutSeconds != nil {
+		w.key("idle_timeout_seconds")
+		encInt64(w, *params.IdleTimeoutSeconds)
+	}
+	if params.MaxActiveStreams != nil {
+		w.key("max_active_streams")
+		encInt64(w, *params.MaxActiveStreams)
+	}
+	if params.Description != nil {
+		w.key("description")
+		encStr(w, *params.Description)
+	}
+	w.endObject()
+	out := new(AIUpdateBotResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DeleteBot 删除机器人及其 IM 用户
+//
+// 进行中的回复以 failed（bot_deleted）结束。机器人不存在返回 not_found。
+//
+// 接口：DELETE /ai/bots/{username}（ai.delete_bot）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) DeleteBot(ctx context.Context, username string) error {
+	c := s.t.newCall(&endpoints.AIDeleteBot)
+	c.path("username", username)
+	return s.t.do(ctx, c, nil)
+}
+
+// DisableBot 停用机器人
+//
+// 停用后不再回调，开始新回复返回 permission_denied（bot_disabled）；进行中的回复不受影响。
+//
+// 接口：POST /ai/bots/{username}/disable（ai.disable_bot）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) DisableBot(ctx context.Context, username string) (*AIDisableBotResult, error) {
+	c := s.t.newCall(&endpoints.AIDisableBot)
+	c.path("username", username)
+	out := new(AIDisableBotResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// EnableBot 启用机器人
+//
+// 接口：POST /ai/bots/{username}/enable（ai.enable_bot）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) EnableBot(ctx context.Context, username string) (*AIEnableBotResult, error) {
+	c := s.t.newCall(&endpoints.AIEnableBot)
+	c.path("username", username)
+	out := new(AIEnableBotResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CreateStream 开始一条流式回复（底层接口，通常用 StartStream）
+//
+// 以机器人的身份给用户写入一条 status 为 streaming 的 ai 消息。按 client_stream_id 去重：重复提交返回 200 和已有的流（不论是否已结束），
+// 没有给时 SDK 生成。会话中已有进行中的回复返回 stream_in_progress（details.stream_id），replace 为真时先把它结束为 stopped（replaced）。
+// 机器人停用为 permission_denied（bot_disabled），用户拉黑了机器人为 user_blocked，进行中的回复数已达上限为 limit_exceeded（bot_active_streams）。
+//
+// 接口：POST /ai/streams（ai.create_stream）。带幂等键的写操作，用同一个键自动重试。
+func (s *AIService) CreateStream(ctx context.Context, bot, to string, params CreateStreamParams) (*AICreateStreamResult, error) {
+	c := s.t.newCall(&endpoints.AICreateStream)
+	w := c.body()
+	c.require(bot != "", "bot")
+	c.require(to != "", "to")
+	w.beginObject()
+	w.key("bot")
+	encStr(w, bot)
+	w.key("to")
+	encStr(w, to)
+	if params.ReplyToSeq != nil {
+		w.key("reply_to_seq")
+		encInt64(w, *params.ReplyToSeq)
+	}
+	clientStreamID := params.ClientStreamID
+	c.checkClientMsgID(clientStreamID)
+	if clientStreamID == "" && !c.unsafe {
+		clientStreamID = newClientMsgID()
+	}
+	if clientStreamID != "" {
+		w.key("client_stream_id")
+		encStr(w, clientStreamID)
+	}
+	if params.Replace {
+		w.key("replace")
+		encBool(w, params.Replace)
+	}
+	w.endObject()
+	out := new(AICreateStreamResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// GetStream 查询流
+//
+// 生成中和结束 10 分钟内带 content（累积的片段）。
+//
+// 接口：GET /ai/streams/{stream_id}（ai.get_stream）。查询，网络错误、超时、5xx 时自动重试。
+func (s *AIService) GetStream(ctx context.Context, streamID string) (*AIGetStreamResult, error) {
+	c := s.t.newCall(&endpoints.AIGetStream)
+	c.path("stream_id", streamID)
+	out := new(AIGetStreamResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// WriteDeltas 按批写入增量（底层接口，通常用 Stream 的写入方法）
+//
+// 一次最多 100 段、64 KB。已接受过的段跳过；序号不连续返回 seq_gap（details.expected_seq）；流已结束返回 stream_closed；
+// 累积内容超过 1 MB 时流以 failed（too_large）结束并返回 payload_too_large（content）。
+//
+// 接口：POST /ai/streams/{stream_id}/deltas:batch（ai.write_deltas）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) WriteDeltas(ctx context.Context, streamID string, deltas []AIDelta) (*AIWriteDeltasResult, error) {
+	c := s.t.newCall(&endpoints.AIWriteDeltas)
+	c.path("stream_id", streamID)
+	w := c.body()
+	c.require(len(deltas) > 0, "deltas")
+	w.beginObject()
+	w.key("deltas")
+	encSlice(encAIDelta)(w, deltas)
+	w.endObject()
+	out := new(AIWriteDeltasResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FailStream 报告失败（生成中断）
+//
+// 以 failed（developer）结束，已生成的部分保留；客户端显示 message。流已结束返回 stream_closed。
+//
+// 接口：POST /ai/streams/{stream_id}/fail（ai.fail_stream）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) FailStream(ctx context.Context, streamID, code, message string) (*AIFailStreamResult, error) {
+	c := s.t.newCall(&endpoints.AIFailStream)
+	c.path("stream_id", streamID)
+	w := c.body()
+	c.require(code != "", "code")
+	w.beginObject()
+	w.key("code")
+	encStr(w, code)
+	if message != "" {
+		w.key("message")
+		encStr(w, message)
+	}
+	w.endObject()
+	out := new(AIFailStreamResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FinishStream 结束流（已完成）
+//
+// last_seq 必须等于已接受的最后一段，否则返回 seq_gap；流已结束返回 stream_closed。
+//
+// 接口：POST /ai/streams/{stream_id}/finish（ai.finish_stream）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *AIService) FinishStream(ctx context.Context, streamID string, lastSeq int64, params FinishStreamParams) (*AIFinishStreamResult, error) {
+	c := s.t.newCall(&endpoints.AIFinishStream)
+	c.path("stream_id", streamID)
+	w := c.body()
+	w.beginObject()
+	w.key("last_seq")
+	encInt64(w, lastSeq)
+	if params.FinishReason != "" {
+		w.key("finish_reason")
+		encStr(w, params.FinishReason)
+	}
+	if params.Model != "" {
+		w.key("model")
+		encStr(w, params.Model)
+	}
+	if params.Usage != nil {
+		w.key("usage")
+		encAIUsage(w, *params.Usage)
+	}
+	w.endObject()
+	out := new(AIFinishStreamResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}

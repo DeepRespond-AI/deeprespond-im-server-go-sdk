@@ -10,6 +10,49 @@ import (
 var _ = time.Time{}
 var _ json.RawMessage
 
+// CreateBotParams 创建机器人的参数（AI.CreateBot）。
+type CreateBotParams struct {
+	Nickname  string
+	AvatarURL string
+	// 接收 ai.message_received 的回调地址；不给时用订阅了它的地址
+	EndpointID string
+	// 回调附带的最近消息条数，默认 10
+	ContextMessages *int64
+	// 没有新内容的超时，默认 60
+	IdleTimeoutSeconds *int64
+	// 同时进行的回复数上限，默认 1000
+	MaxActiveStreams *int64
+	// 备注，最多 256 个字符
+	Description string
+}
+
+// UpdateBotParams 修改机器人的配置的参数（AI.UpdateBot）。
+type UpdateBotParams struct {
+	EndpointID         *string
+	ContextMessages    *int64
+	IdleTimeoutSeconds *int64
+	MaxActiveStreams   *int64
+	Description        *string
+}
+
+// CreateStreamParams 开始一条流式回复（底层接口，通常用 StartStream）的参数（AI.CreateStream）。
+type CreateStreamParams struct {
+	// 回复的是会话中的哪条消息（消息中显示为引用）
+	ReplyToSeq *int64
+	// 幂等标识，1 到 64 个可见 ASCII 字符
+	ClientStreamID string
+	// 会话中已有进行中的回复时先结束它
+	Replace bool
+}
+
+// FinishStreamParams 结束流（已完成）的参数（AI.FinishStream）。
+type FinishStreamParams struct {
+	// 如 stop、length、tool_calls，默认 stop
+	FinishReason string
+	Model        string
+	Usage        *AIUsage
+}
+
 // ListCallsParams 分页列出应用的通话的参数（Calls.List）。
 type ListCallsParams struct {
 	// 参与过的成员
@@ -671,6 +714,57 @@ type SentByParams struct {
 	// 只取早于这个时间发送的
 	EndTime time.Time
 	ListOptions
+}
+
+// AIOp 增量中的一个操作：append 向文字片段追加（type、text），put 整体设置一个片段（part）
+type AIOp struct {
+	// 必填
+	Op string
+	// 必填
+	Index int64
+	Type  string
+	Text  string
+	Part  *AIPart
+}
+
+func encAIOp(w *jw, v AIOp) {
+	w.require(v.Op != "", "op")
+	w.beginObject()
+	w.key("op")
+	encStr(w, v.Op)
+	w.key("index")
+	encInt64(w, v.Index)
+	if v.Type != "" {
+		w.key("type")
+		encStr(w, v.Type)
+	}
+	if v.Text != "" {
+		w.key("text")
+		encStr(w, v.Text)
+	}
+	if v.Part != nil {
+		w.key("part")
+		encAIPart(w, *v.Part)
+	}
+	w.endObject()
+}
+
+// AIDelta 一段增量
+type AIDelta struct {
+	// 必填
+	Seq int64
+	// 必填
+	Ops []AIOp
+}
+
+func encAIDelta(w *jw, v AIDelta) {
+	w.require(len(v.Ops) > 0, "ops")
+	w.beginObject()
+	w.key("seq")
+	encInt64(w, v.Seq)
+	w.key("ops")
+	encSlice(encAIOp)(w, v.Ops)
+	w.endObject()
 }
 
 // Mentions 只用于群聊；不是群成员的用户名被忽略

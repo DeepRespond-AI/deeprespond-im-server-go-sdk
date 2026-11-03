@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/DeepRespond-AI/deeprespond-im-server-go-sdk/internal/aistop"
 )
 
 const (
@@ -293,6 +295,7 @@ func (h *Handler) process(ctx context.Context, ev *Event) (err error) {
 			err = fmt.Errorf("callback: 处理函数 panic：%v", r)
 		}
 	}()
+	stopLocalStream(ev)
 	if h.cfg.Queue != nil {
 		return h.cfg.Queue.Enqueue(ctx, ev)
 	}
@@ -419,4 +422,17 @@ func errorResponse(status int, message string, retryAfter time.Duration) result 
 
 func hookResponse(body []byte) result {
 	return result{status: http.StatusOK, header: http.Header{"Content-Type": {"application/json; charset=utf-8"}}, body: body}
+}
+
+// stopLocalStream：ai.stream_stopped 时本进程中进行中的流（drim.AIService.StartStream 返回的）自动取消 Context。
+func stopLocalStream(ev *Event) {
+	if ev.Type != "ai.stream_stopped" {
+		return
+	}
+	var data struct {
+		StreamID string `json:"stream_id"`
+	}
+	if json.Unmarshal(ev.Data, &data) == nil && data.StreamID != "" {
+		aistop.Stop(data.StreamID)
+	}
 }

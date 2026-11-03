@@ -55,6 +55,9 @@ const (
 	CodePayloadTooLarge    = "payload_too_large" // 也是 SDK 的本地错误（StatusCode 为 0）
 	CodeRateLimited        = "rate_limited"
 	CodeInternal           = "internal"
+	CodeStreamInProgress   = "stream_in_progress" // 会话中已有进行中的 AI 回复，details.stream_id
+	CodeStreamClosed       = "stream_closed"      // AI 回复已结束，details.reason 为结束状态
+	CodeSeqGap             = "seq_gap"            // 增量序号不连续，details.expected_seq
 	CodeNetworkError       = "network_error"      // 连接失败、连接中断、TLS 错误
 	CodeTimeout            = "timeout"            // 尝试超时或 ctx 的截止时间已到
 	CodeCanceled           = "canceled"           // ctx 被取消

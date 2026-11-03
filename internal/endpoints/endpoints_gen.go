@@ -6,6 +6,118 @@ import "time"
 
 var _ = time.Second
 
+// AICreateBot 创建机器人：POST /ai/bots
+var AICreateBot = Endpoint{
+	Name:      "ai.create_bot",
+	Method:    "POST",
+	Path:      "/ai/bots",
+	Category:  UniqueCreate,
+	HasResult: true,
+}
+
+// AIListBots 分页列出机器人：GET /ai/bots
+var AIListBots = Endpoint{
+	Name:       "ai.list_bots",
+	Method:     "GET",
+	Path:       "/ai/bots",
+	Category:   Query,
+	Pagination: "cursor",
+	HasResult:  true,
+}
+
+// AIGetBot 查询机器人：GET /ai/bots/{username}
+var AIGetBot = Endpoint{
+	Name:      "ai.get_bot",
+	Method:    "GET",
+	Path:      "/ai/bots/{username}",
+	Category:  Query,
+	HasResult: true,
+}
+
+// AIUpdateBot 修改机器人的配置：PATCH /ai/bots/{username}
+var AIUpdateBot = Endpoint{
+	Name:      "ai.update_bot",
+	Method:    "PATCH",
+	Path:      "/ai/bots/{username}",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// AIDeleteBot 删除机器人及其 IM 用户：DELETE /ai/bots/{username}
+var AIDeleteBot = Endpoint{
+	Name:     "ai.delete_bot",
+	Method:   "DELETE",
+	Path:     "/ai/bots/{username}",
+	Category: Idempotent,
+}
+
+// AIDisableBot 停用机器人：POST /ai/bots/{username}/disable
+var AIDisableBot = Endpoint{
+	Name:      "ai.disable_bot",
+	Method:    "POST",
+	Path:      "/ai/bots/{username}/disable",
+	Category:  Idempotent,
+	EmptyBody: true,
+	HasResult: true,
+}
+
+// AIEnableBot 启用机器人：POST /ai/bots/{username}/enable
+var AIEnableBot = Endpoint{
+	Name:      "ai.enable_bot",
+	Method:    "POST",
+	Path:      "/ai/bots/{username}/enable",
+	Category:  Idempotent,
+	EmptyBody: true,
+	HasResult: true,
+}
+
+// AICreateStream 开始一条流式回复（底层接口，通常用 StartStream）：POST /ai/streams
+var AICreateStream = Endpoint{
+	Name:            "ai.create_stream",
+	Method:          "POST",
+	Path:            "/ai/streams",
+	Category:        Keyed,
+	IdempotencyKey:  "client_stream_id",
+	DuplicateStatus: 200,
+	HasResult:       true,
+}
+
+// AIGetStream 查询流：GET /ai/streams/{stream_id}
+var AIGetStream = Endpoint{
+	Name:      "ai.get_stream",
+	Method:    "GET",
+	Path:      "/ai/streams/{stream_id}",
+	Category:  Query,
+	HasResult: true,
+}
+
+// AIWriteDeltas 按批写入增量（底层接口，通常用 Stream 的写入方法）：POST /ai/streams/{stream_id}/deltas:batch
+var AIWriteDeltas = Endpoint{
+	Name:      "ai.write_deltas",
+	Method:    "POST",
+	Path:      "/ai/streams/{stream_id}/deltas:batch",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// AIFailStream 报告失败（生成中断）：POST /ai/streams/{stream_id}/fail
+var AIFailStream = Endpoint{
+	Name:      "ai.fail_stream",
+	Method:    "POST",
+	Path:      "/ai/streams/{stream_id}/fail",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// AIFinishStream 结束流（已完成）：POST /ai/streams/{stream_id}/finish
+var AIFinishStream = Endpoint{
+	Name:      "ai.finish_stream",
+	Method:    "POST",
+	Path:      "/ai/streams/{stream_id}/finish",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
 // CallsList 分页列出应用的通话：GET /calls
 var CallsList = Endpoint{
 	Name:           "calls.list",
@@ -1733,6 +1845,18 @@ var ConversationsUnreadCount = Endpoint{
 
 // All 是全部接口，按路径排列。
 var All = []*Endpoint{
+	&AICreateBot,
+	&AIListBots,
+	&AIGetBot,
+	&AIUpdateBot,
+	&AIDeleteBot,
+	&AIDisableBot,
+	&AIEnableBot,
+	&AICreateStream,
+	&AIGetStream,
+	&AIWriteDeltas,
+	&AIFailStream,
+	&AIFinishStream,
 	&CallsList,
 	&CallsGet,
 	&CallsEnd,

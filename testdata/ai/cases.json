@@ -1,0 +1,59 @@
+{
+  "说明": "四种服务端 SDK 的规格测试（《AI对话/3.接口设计》第 11 节）：把 file 中录制的 SSE 交给 adapter 对应的 Pipe 方法，平台按增量累积出的片段应等于 parts，结束信息等于 finish；error 不为空时应以 Fail(\"model_error\", 含 error 的说明) 结束并向调用方返回错误。片段只比较出现的字段。",
+  "cases": [
+    {
+      "name": "openai_chat",
+      "adapter": "openai",
+      "file": "openai_chat.sse",
+      "parts": [
+        {"type": "reasoning", "text": "先想一想"},
+        {"type": "text", "text": "你"},
+        {"type": "tool", "id": "call_1", "name": "search", "title": "search", "state": "done"},
+        {"type": "text", "text": "好，**今天**晴。"}
+      ],
+      "finish": {"finish_reason": "stop", "model": "deepseek-reasoner", "usage": {"input_tokens": 12, "output_tokens": 34}}
+    },
+    {
+      "name": "openai_responses",
+      "adapter": "openai_responses",
+      "file": "openai_responses.sse",
+      "parts": [
+        {"type": "reasoning", "text": "先想一想"},
+        {"type": "tool", "id": "fc_1", "name": "search", "title": "search", "state": "done"},
+        {"type": "tool", "id": "ws_1", "name": "web_search_call", "title": "web_search_call", "state": "done"},
+        {"type": "text", "text": "你好，**今天**晴。"}
+      ],
+      "finish": {"finish_reason": "stop", "model": "gpt-5", "usage": {"input_tokens": 12, "output_tokens": 34}}
+    },
+    {
+      "name": "anthropic",
+      "adapter": "anthropic",
+      "file": "anthropic.sse",
+      "parts": [
+        {"type": "reasoning", "text": "先想一想"},
+        {"type": "tool", "id": "toolu_1", "name": "search", "title": "search", "state": "done"},
+        {"type": "text", "text": "你好，**今天**晴。"}
+      ],
+      "finish": {"finish_reason": "end_turn", "model": "claude-sonnet-5-5", "usage": {"input_tokens": 12, "output_tokens": 34}}
+    },
+    {
+      "name": "gemini",
+      "adapter": "gemini",
+      "file": "gemini.sse",
+      "parts": [
+        {"type": "reasoning", "text": "先想一想"},
+        {"type": "text", "text": "你好，**今天**晴。"}
+      ],
+      "finish": {"finish_reason": "stop", "model": "gemini-3-pro", "usage": {"input_tokens": 12, "output_tokens": 34}}
+    },
+    {
+      "name": "openai_error",
+      "adapter": "openai",
+      "file": "openai_error.sse",
+      "parts": [
+        {"type": "text", "text": "你"}
+      ],
+      "error": "overloaded"
+    }
+  ]
+}

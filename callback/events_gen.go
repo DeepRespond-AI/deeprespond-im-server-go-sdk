@@ -1453,6 +1453,82 @@ func (v *MediaFileUnblocked) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// AIMessageReceived 用户给启用中的机器人发了单聊消息；机器人配置了回调地址时只投递给这个地址
+type AIMessageReceived struct {
+	EventBase
+	// 机器人的用户名
+	Bot string `json:"bot"`
+	// 发消息的用户名
+	From           string `json:"from"`
+	ConversationID string `json:"conversation_id"`
+	// 这条消息（与 OpenAPI 读取消息的对象相同）
+	Message json.RawMessage `json:"message"`
+	// 这条消息之前最近的消息，按时间正序，合计不超过 48 KB
+	Context []json.RawMessage `json:"context"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIMessageReceived) UnmarshalJSON(b []byte) error {
+	type plain AIMessageReceived
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Message = nullRaw(v.Message)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIStreamFinished AI 回复结束：已完成、已停止或生成中断
+type AIStreamFinished struct {
+	EventBase
+	StreamID       string  `json:"stream_id"`
+	ClientStreamID *string `json:"client_stream_id"`
+	Bot            string  `json:"bot"`
+	To             string  `json:"to"`
+	ConversationID string  `json:"conversation_id"`
+	MessageSeq     int64   `json:"message_seq"`
+	Status         string  `json:"status"`
+	FinishReason   *string `json:"finish_reason"`
+	// 失败时为 code、message
+	Error      json.RawMessage `json:"error"`
+	LastSeq    int64           `json:"last_seq"`
+	StartedAt  time.Time       `json:"started_at"`
+	FinishedAt time.Time       `json:"finished_at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIStreamFinished) UnmarshalJSON(b []byte) error {
+	type plain AIStreamFinished
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Error = nullRaw(v.Error)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIStreamStopped 用户点了停止生成；收到后尽快中止模型调用（服务端 SDK 自动取消 Stream.Context）
+type AIStreamStopped struct {
+	EventBase
+	StreamID       string    `json:"stream_id"`
+	ClientStreamID *string   `json:"client_stream_id"`
+	Bot            string    `json:"bot"`
+	To             string    `json:"to"`
+	ConversationID string    `json:"conversation_id"`
+	StoppedBy      string    `json:"stopped_by"`
+	StoppedAt      time.Time `json:"stopped_at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIStreamStopped) UnmarshalJSON(b []byte) error {
+	type plain AIStreamStopped
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
 // RTCChannelCreated RTC 频道创建
 type RTCChannelCreated struct {
 	EventBase
@@ -1793,6 +1869,12 @@ type EventHandlers struct {
 	MediaFileBlocked func(ctx context.Context, ev *Event, d *MediaFileBlocked) error
 	// MediaFileUnblocked media.file_unblocked：文件被解除屏蔽
 	MediaFileUnblocked func(ctx context.Context, ev *Event, d *MediaFileUnblocked) error
+	// AIMessageReceived ai.message_received：用户给启用中的机器人发了单聊消息；机器人配置了回调地址时只投递给这个地址
+	AIMessageReceived func(ctx context.Context, ev *Event, d *AIMessageReceived) error
+	// AIStreamFinished ai.stream_finished：AI 回复结束：已完成、已停止或生成中断
+	AIStreamFinished func(ctx context.Context, ev *Event, d *AIStreamFinished) error
+	// AIStreamStopped ai.stream_stopped：用户点了停止生成；收到后尽快中止模型调用（服务端 SDK 自动取消 Stream.Context）
+	AIStreamStopped func(ctx context.Context, ev *Event, d *AIStreamStopped) error
 	// RTCChannelCreated rtc_channel.created：RTC 频道创建
 	RTCChannelCreated func(ctx context.Context, ev *Event, d *RTCChannelCreated) error
 	// RTCChannelUpdated rtc_channel.updated：RTC 频道更新
@@ -1865,6 +1947,9 @@ func (h *EventHandlers) empty() bool {
 		h.MediaFileUploaded == nil &&
 		h.MediaFileBlocked == nil &&
 		h.MediaFileUnblocked == nil &&
+		h.AIMessageReceived == nil &&
+		h.AIStreamFinished == nil &&
+		h.AIStreamStopped == nil &&
 		h.RTCChannelCreated == nil &&
 		h.RTCChannelUpdated == nil &&
 		h.RTCChannelClosing == nil &&
@@ -2320,6 +2405,33 @@ func (h *EventHandlers) dispatch(ctx context.Context, ev *Event) (known bool, er
 			return true, fmt.Errorf("解析事件 %s（media.file_unblocked）的数据：%w", ev.ID, err)
 		}
 		return true, h.MediaFileUnblocked(ctx, ev, d)
+	case "ai.message_received":
+		if h.AIMessageReceived == nil {
+			return true, nil
+		}
+		d := new(AIMessageReceived)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（ai.message_received）的数据：%w", ev.ID, err)
+		}
+		return true, h.AIMessageReceived(ctx, ev, d)
+	case "ai.stream_finished":
+		if h.AIStreamFinished == nil {
+			return true, nil
+		}
+		d := new(AIStreamFinished)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（ai.stream_finished）的数据：%w", ev.ID, err)
+		}
+		return true, h.AIStreamFinished(ctx, ev, d)
+	case "ai.stream_stopped":
+		if h.AIStreamStopped == nil {
+			return true, nil
+		}
+		d := new(AIStreamStopped)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（ai.stream_stopped）的数据：%w", ev.ID, err)
+		}
+		return true, h.AIStreamStopped(ctx, ev, d)
 	case "rtc_channel.created":
 		if h.RTCChannelCreated == nil {
 			return true, nil
@@ -2507,6 +2619,12 @@ func (e *Event) Decode() (any, error) {
 		d = new(MediaFileBlocked)
 	case "media.file_unblocked":
 		d = new(MediaFileUnblocked)
+	case "ai.message_received":
+		d = new(AIMessageReceived)
+	case "ai.stream_finished":
+		d = new(AIStreamFinished)
+	case "ai.stream_stopped":
+		d = new(AIStreamStopped)
 	case "rtc_channel.created":
 		d = new(RTCChannelCreated)
 	case "rtc_channel.updated":
@@ -2585,6 +2703,9 @@ var EventTypes = []string{
 	"media.file_uploaded",
 	"media.file_blocked",
 	"media.file_unblocked",
+	"ai.message_received",
+	"ai.stream_finished",
+	"ai.stream_stopped",
 	"rtc_channel.created",
 	"rtc_channel.updated",
 	"rtc_channel.closing",

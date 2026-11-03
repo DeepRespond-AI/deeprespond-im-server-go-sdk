@@ -11,6 +11,314 @@ import (
 var _ = time.Time{}
 var _ = fmt.Sprint
 
+// Bot 机器人
+type Bot struct {
+	Username  string `json:"username"`
+	Nickname  string `json:"nickname"`
+	AvatarURL string `json:"avatar_url"`
+	Status    string `json:"status"`
+	// IM 用户的状态（active / disabled）
+	UserStatus         string    `json:"user_status"`
+	EndpointID         *string   `json:"endpoint_id"`
+	ContextMessages    int64     `json:"context_messages"`
+	IdleTimeoutSeconds int64     `json:"idle_timeout_seconds"`
+	MaxActiveStreams   int64     `json:"max_active_streams"`
+	Description        string    `json:"description"`
+	Version            int64     `json:"version"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *Bot) UnmarshalJSON(b []byte) error {
+	type plain Bot
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AICreateBotResult AICreateBotResult
+type AICreateBotResult struct {
+	Bot Bot `json:"bot"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AICreateBotResult) UnmarshalJSON(b []byte) error {
+	type plain AICreateBotResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIGetBotResult AIGetBotResult
+type AIGetBotResult struct {
+	Bot Bot `json:"bot"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIGetBotResult) UnmarshalJSON(b []byte) error {
+	type plain AIGetBotResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIUpdateBotResult AIUpdateBotResult
+type AIUpdateBotResult struct {
+	Bot Bot `json:"bot"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIUpdateBotResult) UnmarshalJSON(b []byte) error {
+	type plain AIUpdateBotResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIDisableBotResult AIDisableBotResult
+type AIDisableBotResult struct {
+	Bot Bot `json:"bot"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIDisableBotResult) UnmarshalJSON(b []byte) error {
+	type plain AIDisableBotResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIEnableBotResult AIEnableBotResult
+type AIEnableBotResult struct {
+	Bot Bot `json:"bot"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIEnableBotResult) UnmarshalJSON(b []byte) error {
+	type plain AIEnableBotResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIError AIError
+type AIError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIError) UnmarshalJSON(b []byte) error {
+	type plain AIError
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIUsage AIUsage
+type AIUsage struct {
+	InputTokens  int64 `json:"input_tokens"`
+	OutputTokens int64 `json:"output_tokens"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIUsage) UnmarshalJSON(b []byte) error {
+	type plain AIUsage
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIPart 片段：text、reasoning 为文字；image、file 为附件；tool 为工具调用的进度
+type AIPart struct {
+	Type     string `json:"type"`
+	Text     string `json:"text"`
+	URL      string `json:"url"`
+	Width    int64  `json:"width"`
+	Height   int64  `json:"height"`
+	Alt      string `json:"alt"`
+	Name     string `json:"name"`
+	Size     int64  `json:"size"`
+	MimeType string `json:"mime_type"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	State    string `json:"state"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIPart) UnmarshalJSON(b []byte) error {
+	type plain AIPart
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIStream 一条流式回复
+type AIStream struct {
+	StreamID       string `json:"stream_id"`
+	Bot            string `json:"bot"`
+	To             string `json:"to"`
+	ConversationID string `json:"conversation_id"`
+	MessageID      string `json:"message_id"`
+	// AI 消息在会话中的序号
+	Seq            int64   `json:"seq"`
+	ClientStreamID *string `json:"client_stream_id"`
+	ReplyToSeq     *int64  `json:"reply_to_seq"`
+	Status         string  `json:"status"`
+	// 已接受的最后一段增量的序号
+	LastSeq      int64      `json:"last_seq"`
+	FinishReason *string    `json:"finish_reason"`
+	Error        *AIError   `json:"error"`
+	Model        *string    `json:"model"`
+	Usage        *AIUsage   `json:"usage"`
+	ContentBytes int64      `json:"content_bytes"`
+	FirstDeltaMs *int64     `json:"first_delta_ms"`
+	StartedAt    time.Time  `json:"started_at"`
+	FinishedAt   *time.Time `json:"finished_at"`
+	// 累积的片段；生成中和结束 10 分钟内才有
+	Content []AIPart `json:"content"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIStream) UnmarshalJSON(b []byte) error {
+	type plain AIStream
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AICreateStreamResult AICreateStreamResult
+type AICreateStreamResult struct {
+	Stream AIStream `json:"stream"`
+	// Duplicate 由状态码得出：为真表示重复提交，结果是第一次的。
+	Duplicate bool `json:"-"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AICreateStreamResult) UnmarshalJSON(b []byte) error {
+	type plain AICreateStreamResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+func (v *AICreateStreamResult) setStatus(code int) {
+	v.Duplicate = code == 200
+}
+
+// AIGetStreamResult AIGetStreamResult
+type AIGetStreamResult struct {
+	Stream AIStream `json:"stream"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIGetStreamResult) UnmarshalJSON(b []byte) error {
+	type plain AIGetStreamResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIWriteDeltasResult AIWriteDeltasResult
+type AIWriteDeltasResult struct {
+	AckedSeq int64 `json:"acked_seq"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIWriteDeltasResult) UnmarshalJSON(b []byte) error {
+	type plain AIWriteDeltasResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIFailStreamResult AIFailStreamResult
+type AIFailStreamResult struct {
+	Stream AIStream `json:"stream"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIFailStreamResult) UnmarshalJSON(b []byte) error {
+	type plain AIFailStreamResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// AIFinishStreamResult AIFinishStreamResult
+type AIFinishStreamResult struct {
+	Stream AIStream `json:"stream"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *AIFinishStreamResult) UnmarshalJSON(b []byte) error {
+	type plain AIFinishStreamResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
 // CallMember 通话的成员（服务端视角）
 type CallMember struct {
 	// 已删除的用户为 null
@@ -4140,6 +4448,66 @@ func (v *UnreadCount) UnmarshalJSON(b []byte) error {
 	}
 	v.Raw = cloneRaw(b)
 	return nil
+}
+
+func encAIUsage(w *jw, v AIUsage) {
+	w.beginObject()
+	w.key("input_tokens")
+	encInt64(w, v.InputTokens)
+	w.key("output_tokens")
+	encInt64(w, v.OutputTokens)
+	w.endObject()
+}
+
+func encAIPart(w *jw, v AIPart) {
+	w.beginObject()
+	w.key("type")
+	encStr(w, v.Type)
+	if v.Text != "" {
+		w.key("text")
+		encStr(w, v.Text)
+	}
+	if v.URL != "" {
+		w.key("url")
+		encStr(w, v.URL)
+	}
+	if v.Width != 0 {
+		w.key("width")
+		encInt64(w, v.Width)
+	}
+	if v.Height != 0 {
+		w.key("height")
+		encInt64(w, v.Height)
+	}
+	if v.Alt != "" {
+		w.key("alt")
+		encStr(w, v.Alt)
+	}
+	if v.Name != "" {
+		w.key("name")
+		encStr(w, v.Name)
+	}
+	if v.Size != 0 {
+		w.key("size")
+		encInt64(w, v.Size)
+	}
+	if v.MimeType != "" {
+		w.key("mime_type")
+		encStr(w, v.MimeType)
+	}
+	if v.ID != "" {
+		w.key("id")
+		encStr(w, v.ID)
+	}
+	if v.Title != "" {
+		w.key("title")
+		encStr(w, v.Title)
+	}
+	if v.State != "" {
+		w.key("state")
+		encStr(w, v.State)
+	}
+	w.endObject()
 }
 
 func encPenaltyRule(w *jw, v PenaltyRule) {

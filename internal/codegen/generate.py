@@ -44,11 +44,12 @@ SERVICES = [
     ("calls", "CallsService", "音视频通话的查询与结束、统计（client.Calls）。"),
     ("channels", "ChannelsService", "独立 RTC 频道管理与用量更正（client.Channels）。"),
     ("presence", "PresenceService", "在线状态（client.Presence）。"),
+    ("ai", "AIService", "AI 对话：机器人管理与流式回复（client.AI）；流式写入用 StartStream。"),
 ]
 
 INITIALISMS = {
     "id": "ID", "ids": "IDs", "url": "URL", "urls": "URLs", "uid": "UID", "ip": "IP", "dnd": "DND",
-    "sha256": "SHA256", "sdk": "SDK", "api": "API", "http": "HTTP", "json": "JSON", "ttl": "TTL",
+    "sha256": "SHA256", "sdk": "SDK", "api": "API", "ai": "AI", "http": "HTTP", "json": "JSON", "ttl": "TTL",
 }
 GO_KEYWORDS = {
     "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func", "go", "goto",
