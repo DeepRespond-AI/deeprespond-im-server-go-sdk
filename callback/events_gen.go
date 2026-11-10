@@ -1763,6 +1763,199 @@ func (v *RTCChannelMemberUnbanned) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// GameRoomCreated 游戏房间创建成功（已分配到游戏节点）
+type GameRoomCreated struct {
+	EventBase
+	RoomID string `json:"room_id"`
+	// 房间版本，用于判断新旧
+	Version int64 `json:"version"`
+	// 建房时的扩展字段
+	Ext        json.RawMessage `json:"ext"`
+	Region     string          `json:"region"`
+	MaxPlayers int64           `json:"max_players"`
+	SyncMode   string          `json:"sync_mode"`
+	TickRate   int64           `json:"tick_rate"`
+	CreatedAt  time.Time       `json:"created_at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomCreated) UnmarshalJSON(b []byte) error {
+	type plain GameRoomCreated
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomStarted 游戏房间开始对局（游戏节点开始推进帧）
+type GameRoomStarted struct {
+	EventBase
+	RoomID      string          `json:"room_id"`
+	Version     int64           `json:"version"`
+	Ext         json.RawMessage `json:"ext"`
+	StartedAt   *time.Time      `json:"started_at"`
+	PlayerCount int64           `json:"player_count"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomStarted) UnmarshalJSON(b []byte) error {
+	type plain GameRoomStarted
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomMemberJoined 玩家拿到游戏房间的座位
+type GameRoomMemberJoined struct {
+	EventBase
+	RoomID   string          `json:"room_id"`
+	Version  int64           `json:"version"`
+	Ext      json.RawMessage `json:"ext"`
+	Username string          `json:"username"`
+	Seat     int64           `json:"seat"`
+	JoinedAt time.Time       `json:"joined_at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomMemberJoined) UnmarshalJSON(b []byte) error {
+	type plain GameRoomMemberJoined
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomMemberConnected 玩家第一次连上游戏节点；频繁，按需订阅
+type GameRoomMemberConnected struct {
+	EventBase
+	RoomID    string          `json:"room_id"`
+	Version   int64           `json:"version"`
+	Ext       json.RawMessage `json:"ext"`
+	Username  string          `json:"username"`
+	Seat      int64           `json:"seat"`
+	Transport string          `json:"transport"`
+	At        time.Time       `json:"at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomMemberConnected) UnmarshalJSON(b []byte) error {
+	type plain GameRoomMemberConnected
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomMemberDisconnected 玩家与游戏节点断线（重连窗口内可以恢复）；频繁，按需订阅
+type GameRoomMemberDisconnected struct {
+	EventBase
+	RoomID   string          `json:"room_id"`
+	Version  int64           `json:"version"`
+	Ext      json.RawMessage `json:"ext"`
+	Username string          `json:"username"`
+	Seat     int64           `json:"seat"`
+	Reason   string          `json:"reason"`
+	At       time.Time       `json:"at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomMemberDisconnected) UnmarshalJSON(b []byte) error {
+	type plain GameRoomMemberDisconnected
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomMemberLeft 玩家离开游戏房间（主动离开、超时、被移出、未按时连接、房间结束）
+type GameRoomMemberLeft struct {
+	EventBase
+	RoomID   string          `json:"room_id"`
+	Version  int64           `json:"version"`
+	Ext      json.RawMessage `json:"ext"`
+	Username string          `json:"username"`
+	Seat     int64           `json:"seat"`
+	Reason   string          `json:"reason"`
+	// 这次加入累计的在线时长（毫秒）
+	ConnectedMs int64      `json:"connected_ms"`
+	LeftAt      *time.Time `json:"left_at"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomMemberLeft) UnmarshalJSON(b []byte) error {
+	type plain GameRoomMemberLeft
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomClosedMember GameRoomClosedMember
+type GameRoomClosedMember struct {
+	Username    string `json:"username"`
+	Seat        int64  `json:"seat"`
+	ConnectedMs int64  `json:"connected_ms"`
+	// ceil(connected_ms / 60000)，仅供业务参考，账单按天汇总
+	BillableMinutes int64  `json:"billable_minutes"`
+	LeaveReason     string `json:"leave_reason"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomClosedMember) UnmarshalJSON(b []byte) error {
+	type plain GameRoomClosedMember
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomClosed 游戏房间结束，带时长、结算结果和每个玩家的在线时长、计费分钟数
+type GameRoomClosed struct {
+	EventBase
+	RoomID      string          `json:"room_id"`
+	Version     int64           `json:"version"`
+	Ext         json.RawMessage `json:"ext"`
+	CloseReason string          `json:"close_reason"`
+	CreatedAt   time.Time       `json:"created_at"`
+	// 没有开局为 null
+	StartedAt *time.Time `json:"started_at"`
+	ClosedAt  *time.Time `json:"closed_at"`
+	// 开局到结束的时长（毫秒），没有开局为 0
+	DurationMs int64 `json:"duration_ms"`
+	// G7 结束时给的结算结果
+	Result json.RawMessage `json:"result"`
+	// 每次加入一项（含换人前的成员），按座位、加入顺序
+	Members []GameRoomClosedMember `json:"members"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomClosed) UnmarshalJSON(b []byte) error {
+	type plain GameRoomClosed
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Result = nullRaw(v.Result)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
 // EventHandlers 每种事件一个处理函数（同步方式）；没有设置的事件忽略（记 debug 日志）。
 //
 // 处理函数返回错误时这一批返回 503，服务端稍后重发；返回 RetryAfter 包装的错误时带上 Retry-After。
@@ -1893,6 +2086,20 @@ type EventHandlers struct {
 	RTCChannelMemberBanned func(ctx context.Context, ev *Event, d *RTCChannelMemberBanned) error
 	// RTCChannelMemberUnbanned rtc_channel.member_unbanned：RTC 频道解除封禁
 	RTCChannelMemberUnbanned func(ctx context.Context, ev *Event, d *RTCChannelMemberUnbanned) error
+	// GameRoomCreated game_room.created：游戏房间创建成功（已分配到游戏节点）
+	GameRoomCreated func(ctx context.Context, ev *Event, d *GameRoomCreated) error
+	// GameRoomStarted game_room.started：游戏房间开始对局（游戏节点开始推进帧）
+	GameRoomStarted func(ctx context.Context, ev *Event, d *GameRoomStarted) error
+	// GameRoomMemberJoined game_room.member_joined：玩家拿到游戏房间的座位
+	GameRoomMemberJoined func(ctx context.Context, ev *Event, d *GameRoomMemberJoined) error
+	// GameRoomMemberConnected game_room.member_connected：玩家第一次连上游戏节点；频繁，按需订阅
+	GameRoomMemberConnected func(ctx context.Context, ev *Event, d *GameRoomMemberConnected) error
+	// GameRoomMemberDisconnected game_room.member_disconnected：玩家与游戏节点断线（重连窗口内可以恢复）；频繁，按需订阅
+	GameRoomMemberDisconnected func(ctx context.Context, ev *Event, d *GameRoomMemberDisconnected) error
+	// GameRoomMemberLeft game_room.member_left：玩家离开游戏房间（主动离开、超时、被移出、未按时连接、房间结束）
+	GameRoomMemberLeft func(ctx context.Context, ev *Event, d *GameRoomMemberLeft) error
+	// GameRoomClosed game_room.closed：游戏房间结束，带时长、结算结果和每个玩家的在线时长、计费分钟数
+	GameRoomClosed func(ctx context.Context, ev *Event, d *GameRoomClosed) error
 }
 
 // empty 为真表示没有设置任何处理函数。
@@ -1958,7 +2165,14 @@ func (h *EventHandlers) empty() bool {
 		h.RTCChannelSessionLeaving == nil &&
 		h.RTCChannelSessionLeft == nil &&
 		h.RTCChannelMemberBanned == nil &&
-		h.RTCChannelMemberUnbanned == nil
+		h.RTCChannelMemberUnbanned == nil &&
+		h.GameRoomCreated == nil &&
+		h.GameRoomStarted == nil &&
+		h.GameRoomMemberJoined == nil &&
+		h.GameRoomMemberConnected == nil &&
+		h.GameRoomMemberDisconnected == nil &&
+		h.GameRoomMemberLeft == nil &&
+		h.GameRoomClosed == nil
 }
 
 // dispatch 交给这个事件类型的处理函数；known 为假表示 SDK 不认识这个类型。
@@ -2513,6 +2727,69 @@ func (h *EventHandlers) dispatch(ctx context.Context, ev *Event) (known bool, er
 			return true, fmt.Errorf("解析事件 %s（rtc_channel.member_unbanned）的数据：%w", ev.ID, err)
 		}
 		return true, h.RTCChannelMemberUnbanned(ctx, ev, d)
+	case "game_room.created":
+		if h.GameRoomCreated == nil {
+			return true, nil
+		}
+		d := new(GameRoomCreated)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.created）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomCreated(ctx, ev, d)
+	case "game_room.started":
+		if h.GameRoomStarted == nil {
+			return true, nil
+		}
+		d := new(GameRoomStarted)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.started）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomStarted(ctx, ev, d)
+	case "game_room.member_joined":
+		if h.GameRoomMemberJoined == nil {
+			return true, nil
+		}
+		d := new(GameRoomMemberJoined)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.member_joined）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomMemberJoined(ctx, ev, d)
+	case "game_room.member_connected":
+		if h.GameRoomMemberConnected == nil {
+			return true, nil
+		}
+		d := new(GameRoomMemberConnected)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.member_connected）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomMemberConnected(ctx, ev, d)
+	case "game_room.member_disconnected":
+		if h.GameRoomMemberDisconnected == nil {
+			return true, nil
+		}
+		d := new(GameRoomMemberDisconnected)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.member_disconnected）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomMemberDisconnected(ctx, ev, d)
+	case "game_room.member_left":
+		if h.GameRoomMemberLeft == nil {
+			return true, nil
+		}
+		d := new(GameRoomMemberLeft)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.member_left）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomMemberLeft(ctx, ev, d)
+	case "game_room.closed":
+		if h.GameRoomClosed == nil {
+			return true, nil
+		}
+		d := new(GameRoomClosed)
+		if err := json.Unmarshal(ev.Data, d); err != nil {
+			return true, fmt.Errorf("解析事件 %s（game_room.closed）的数据：%w", ev.ID, err)
+		}
+		return true, h.GameRoomClosed(ctx, ev, d)
 	}
 	return false, nil
 }
@@ -2643,6 +2920,20 @@ func (e *Event) Decode() (any, error) {
 		d = new(RTCChannelMemberBanned)
 	case "rtc_channel.member_unbanned":
 		d = new(RTCChannelMemberUnbanned)
+	case "game_room.created":
+		d = new(GameRoomCreated)
+	case "game_room.started":
+		d = new(GameRoomStarted)
+	case "game_room.member_joined":
+		d = new(GameRoomMemberJoined)
+	case "game_room.member_connected":
+		d = new(GameRoomMemberConnected)
+	case "game_room.member_disconnected":
+		d = new(GameRoomMemberDisconnected)
+	case "game_room.member_left":
+		d = new(GameRoomMemberLeft)
+	case "game_room.closed":
+		d = new(GameRoomClosed)
 	default:
 		return nil, ErrUnknownEventType
 	}
@@ -2715,4 +3006,11 @@ var EventTypes = []string{
 	"rtc_channel.session_left",
 	"rtc_channel.member_banned",
 	"rtc_channel.member_unbanned",
+	"game_room.created",
+	"game_room.started",
+	"game_room.member_joined",
+	"game_room.member_connected",
+	"game_room.member_disconnected",
+	"game_room.member_left",
+	"game_room.closed",
 }

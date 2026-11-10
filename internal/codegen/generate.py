@@ -6,7 +6,7 @@
 - types_gen.go                          响应的数据类型（带 Raw 和 UnmarshalJSON）、批量结果的方法
 - params_gen.go                         参数类型和请求体的编码函数
 - services_gen.go                       各服务的方法和遍历方法
-- callback/events_gen.go                49 种事件的数据类型、EventHandlers 和分派
+- callback/events_gen.go                全部事件（spec/callback.yaml）的数据类型、EventHandlers 和分派
 - callback/hooks_gen.go                 4 种同步回调的请求类型和 HookHandlers
 - drimtest/signature_vectors.json       签名的测试向量（随包发布，复制自 sdk/server/testdata）
 
@@ -45,6 +45,7 @@ SERVICES = [
     ("channels", "ChannelsService", "独立 RTC 频道管理与用量更正（client.Channels）。"),
     ("presence", "PresenceService", "在线状态（client.Presence）。"),
     ("ai", "AIService", "AI 对话：机器人管理与流式回复（client.AI）；流式写入用 StartStream。"),
+    ("game", "GameService", "游戏房间：建房、签加入票据、开局、结束、移出玩家，成员与大区（client.Game）。"),
 ]
 
 INITIALISMS = {
@@ -728,6 +729,9 @@ class Generator:
             gt = self.out(prop, owner, info["unwrap"])
             if gt.kind == "int64":
                 gt = GT("int", "int")
+            elif gt.kind == "struct" and not gt.ptr:
+                # 单个对象（如 {"room": Room}）返回指针，与不拆开的结果一致，出错时为 nil
+                gt = GT("struct", "*" + gt.expr, name=gt.name, ptr=True)
             info["unwrap_gt"] = gt
             return info
         if op.get("x-drim-loop"):
@@ -852,7 +856,12 @@ class Generator:
             lines.append("\t// Error 失败时的错误（Key 为这一项的标识），成功时为 nil。\n")
             lines.append('\tError *ItemError `json:"-"`\n')
         for flag in definition.status_flags:
-            description = {"created": "为真表示新建（201）；为假表示已有结果（200）", "pending": "为真表示仍在异步处理（202）"}.get(flag, "为真表示重复提交，结果是第一次的")
+            description = {
+                "created": "为真表示新建（201）；为假表示已有结果（200）",
+                "pending": "为真表示仍在异步处理（202）",
+                "accepted": "为真表示这次调用开始了结束（202）；为假表示之前已在结束或已结束（200）",
+                "removed": "为真表示用户在房间里、已被移出（202）；为假表示用户不在房间里（200）",
+            }.get(flag, "为真表示重复提交，结果是第一次的")
             lines.append(f"\t// {pascal(flag)} 由状态码得出：{description}。\n")
             lines.append(f'\t{pascal(flag)} bool `json:"-"`\n')
         if not definition.base:

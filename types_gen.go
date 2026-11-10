@@ -1185,6 +1185,216 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// GameRegion 可以建房的大区
+type GameRegion struct {
+	Region string `json:"region"`
+	Name   string `json:"name"`
+	// 是否为应用的默认大区
+	Default bool `json:"default"`
+	// 当前是否有可调度的游戏节点
+	Available bool `json:"available"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRegion) UnmarshalJSON(b []byte) error {
+	type plain GameRegion
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoomSnapshot 状态快照设置
+type GameRoomSnapshot struct {
+	Enabled         bool  `json:"enabled"`
+	IntervalSeconds int64 `json:"interval_seconds"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoomSnapshot) UnmarshalJSON(b []byte) error {
+	type plain GameRoomSnapshot
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRoom 游戏房间
+type GameRoom struct {
+	RoomID     string `json:"room_id"`
+	Name       string `json:"name"`
+	Status     string `json:"status"`
+	Region     string `json:"region"`
+	RegionName string `json:"region_name"`
+	MaxPlayers int64  `json:"max_players"`
+	// 当前在座的人数
+	PlayerCount int64  `json:"player_count"`
+	SyncMode    string `json:"sync_mode"`
+	// 帧率；relay 为 0
+	TickRate               int64            `json:"tick_rate"`
+	StartMode              string           `json:"start_mode"`
+	AccessMode             string           `json:"access_mode"`
+	MaxDurationSeconds     int64            `json:"max_duration_seconds"`
+	ReconnectWindowSeconds int64            `json:"reconnect_window_seconds"`
+	Snapshot               GameRoomSnapshot `json:"snapshot"`
+	Ext                    json.RawMessage  `json:"ext"`
+	// 房间版本，每次状态变化加一；用于判断回调的新旧
+	Version   int64      `json:"version"`
+	CreatedAt time.Time  `json:"created_at"`
+	StartedAt *time.Time `json:"started_at"`
+	ClosedAt  *time.Time `json:"closed_at"`
+	// 结束原因（closing 时已有）；没有结束时为空字符串
+	CloseReason string `json:"close_reason"`
+	// 结束时的结算结果
+	Result json.RawMessage `json:"result"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRoom) UnmarshalJSON(b []byte) error {
+	type plain GameRoom
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Ext = nullRaw(v.Ext)
+	v.Result = nullRaw(v.Result)
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameCreateRoomResult GameCreateRoomResult
+type GameCreateRoomResult struct {
+	Room GameRoom `json:"room"`
+	// Created 由状态码得出：为真表示新建（201）；为假表示已有结果（200）。
+	Created bool `json:"-"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameCreateRoomResult) UnmarshalJSON(b []byte) error {
+	type plain GameCreateRoomResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+func (v *GameCreateRoomResult) setStatus(code int) {
+	v.Created = code == 201
+}
+
+// GameCloseRoomResult GameCloseRoomResult
+type GameCloseRoomResult struct {
+	Room GameRoom `json:"room"`
+	// Accepted 由状态码得出：为真表示这次调用开始了结束（202）；为假表示之前已在结束或已结束（200）。
+	Accepted bool `json:"-"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameCloseRoomResult) UnmarshalJSON(b []byte) error {
+	type plain GameCloseRoomResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+func (v *GameCloseRoomResult) setStatus(code int) {
+	v.Accepted = code == 202
+}
+
+// GameMember 房间成员（一次加入）
+type GameMember struct {
+	Seat     int64  `json:"seat"`
+	Username string `json:"username"`
+	Status   string `json:"status"`
+	// 当前或最近一次连接的通道；没连上过为空字符串
+	Transport string `json:"transport"`
+	// 往返延迟的中位数（毫秒），只在 connected 时有
+	RttMs    *int64    `json:"rtt_ms"`
+	JoinedAt time.Time `json:"joined_at"`
+	// 累计在线时长（毫秒），按节点上报更新
+	ConnectedMs int64      `json:"connected_ms"`
+	LeftAt      *time.Time `json:"left_at"`
+	// 离开原因；没有离开时为空字符串
+	LeaveReason string `json:"leave_reason"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameMember) UnmarshalJSON(b []byte) error {
+	type plain GameMember
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// GameRemoveMemberResult GameRemoveMemberResult
+type GameRemoveMemberResult struct {
+	OperationID string      `json:"operation_id"`
+	Member      *GameMember `json:"member"`
+	// Removed 由状态码得出：为真表示用户在房间里、已被移出（202）；为假表示用户不在房间里（200）。
+	Removed bool `json:"-"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameRemoveMemberResult) UnmarshalJSON(b []byte) error {
+	type plain GameRemoveMemberResult
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+func (v *GameRemoveMemberResult) setStatus(code int) {
+	v.Removed = code == 202
+}
+
+// GameTicket 加入票据；原文只在签发时返回一次
+type GameTicket struct {
+	// 用户名（小写）
+	Username string `json:"username"`
+	// 指定的座位；没有指定为 null
+	Seat      *int64    `json:"seat"`
+	Ticket    string    `json:"ticket"`
+	ExpiresAt time.Time `json:"expires_at"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameTicket) UnmarshalJSON(b []byte) error {
+	type plain GameTicket
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
+// String 遮掩敏感的字段。
+func (v GameTicket) String() string {
+	return fmt.Sprintf("GameTicket{Username:%v Seat:%v Ticket:*** ExpiresAt:%v}", v.Username, v.Seat, v.ExpiresAt)
+}
+
 // GroupMemberResultItem 批量加人、移人和建群中一个用户的结果：成功时有 status，失败时有 code、message、details
 type GroupMemberResultItem struct {
 	// 用户名（小写）
@@ -2688,8 +2898,10 @@ type TextCheck struct {
 	// 有替换时为替换后的文本，否则为原文
 	Text string         `json:"text"`
 	Hits []TextCheckHit `json:"hits"`
-	// 第三方审核的结果，没有调用时为 null
+	// 智能审核的结果，没有调用时为 null
 	ProviderResult *TextCheckProviderResult `json:"provider_result"`
+	// 要求了智能审核但这次没有执行的原因，执行了或没有要求时为 null：not_enabled（这个场景没有开启文本审核）、 no_account（平台没有可用的文本审核账号）、not_entitled（套餐不含平台内容审核）、quota（额度用完且审核余额不足，或超出每秒份额）、 failed（调用失败、超时或熔断中）
+	ProviderSkipped *string `json:"provider_skipped"`
 	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
 	Raw json.RawMessage `json:"-"`
 }

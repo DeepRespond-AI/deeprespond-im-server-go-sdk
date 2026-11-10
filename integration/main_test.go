@@ -32,6 +32,7 @@ var env struct {
 	AppName      string `json:"app_name"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
+	GameRegion   string `json:"game_region"` // harness 打开游戏房间时登记的大区
 }
 
 var envErr error

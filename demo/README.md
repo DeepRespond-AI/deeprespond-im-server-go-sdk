@@ -41,7 +41,7 @@
 
 ## 下载与运行
 
-[下载 v1.0.1 源码 ZIP](https://github.com/DeepRespond-AI/deeprespond-im-server-go-sdk/archive/refs/tags/v1.0.1.zip)。
+[下载 v1.0.3 源码 ZIP](https://github.com/DeepRespond-AI/deeprespond-im-server-go-sdk/archive/refs/tags/v1.0.3.zip)。
 
 解压后进入仓库根目录，再执行下面的命令。
 

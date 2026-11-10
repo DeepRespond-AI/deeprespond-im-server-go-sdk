@@ -500,6 +500,89 @@ var ConversationsPins = Endpoint{
 	HasResult:  true,
 }
 
+// GameListRegions 列出可以建房的大区：GET /game/regions
+var GameListRegions = Endpoint{
+	Name:      "game.list_regions",
+	Method:    "GET",
+	Path:      "/game/regions",
+	Category:  Query,
+	HasResult: true,
+}
+
+// GameListRooms 分页列出游戏房间：GET /game/rooms
+var GameListRooms = Endpoint{
+	Name:       "game.list_rooms",
+	Method:     "GET",
+	Path:       "/game/rooms",
+	Category:   Query,
+	Pagination: "cursor",
+	HasResult:  true,
+}
+
+// GameCreateRoom 创建游戏房间：PUT /game/rooms/{room_id}
+var GameCreateRoom = Endpoint{
+	Name:      "game.create_room",
+	Method:    "PUT",
+	Path:      "/game/rooms/{room_id}",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// GameGetRoom 查询游戏房间：GET /game/rooms/{room_id}
+var GameGetRoom = Endpoint{
+	Name:      "game.get_room",
+	Method:    "GET",
+	Path:      "/game/rooms/{room_id}",
+	Category:  Query,
+	HasResult: true,
+}
+
+// GameCloseRoom 结束游戏房间：POST /game/rooms/{room_id}/close
+var GameCloseRoom = Endpoint{
+	Name:      "game.close_room",
+	Method:    "POST",
+	Path:      "/game/rooms/{room_id}/close",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// GameListMembers 列出房间成员和连接状态：GET /game/rooms/{room_id}/members
+var GameListMembers = Endpoint{
+	Name:      "game.list_members",
+	Method:    "GET",
+	Path:      "/game/rooms/{room_id}/members",
+	Category:  Query,
+	HasResult: true,
+}
+
+// GameRemoveMember 把玩家移出房间：POST /game/rooms/{room_id}/members/{username}/remove
+var GameRemoveMember = Endpoint{
+	Name:           "game.remove_member",
+	Method:         "POST",
+	Path:           "/game/rooms/{room_id}/members/{username}/remove",
+	Category:       Keyed,
+	IdempotencyKey: "operation_id",
+	HasResult:      true,
+}
+
+// GameStartRoom 手动开局：POST /game/rooms/{room_id}/start
+var GameStartRoom = Endpoint{
+	Name:      "game.start_room",
+	Method:    "POST",
+	Path:      "/game/rooms/{room_id}/start",
+	Category:  Idempotent,
+	HasResult: true,
+}
+
+// GameIssueTickets 签发加入票据：POST /game/rooms/{room_id}/tickets
+var GameIssueTickets = Endpoint{
+	Name:      "game.issue_tickets",
+	Method:    "POST",
+	Path:      "/game/rooms/{room_id}/tickets",
+	Category:  Unsafe,
+	HasResult: true,
+}
+
 // GroupsCreate 建群（初始成员直接入群）：POST /groups
 var GroupsCreate = Endpoint{
 	Name:         "groups.create",
@@ -1895,6 +1978,15 @@ var All = []*Endpoint{
 	&ConversationsGet,
 	&ConversationsMessages,
 	&ConversationsPins,
+	&GameListRegions,
+	&GameListRooms,
+	&GameCreateRoom,
+	&GameGetRoom,
+	&GameCloseRoom,
+	&GameListMembers,
+	&GameRemoveMember,
+	&GameStartRoom,
+	&GameIssueTickets,
 	&GroupsCreate,
 	&GroupsList,
 	&GroupsGet,

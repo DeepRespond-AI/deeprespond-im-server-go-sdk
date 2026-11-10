@@ -155,6 +155,67 @@ type SeqParams struct {
 	Limit   int
 }
 
+// ListGameRoomsParams 分页列出游戏房间的参数（Game.ListRooms）。
+type ListGameRoomsParams struct {
+	// open、playing、closing、closed，多个用逗号分隔
+	Status string
+	// 房间 ID 前缀
+	Search string
+	ListOptions
+}
+
+// CreateGameRoomParams 创建游戏房间的参数（Game.CreateRoom）。
+type CreateGameRoomParams struct {
+	// 房间名，最多 128 个字
+	Name string
+	// 大区；与 regions 二选一，都不传时用应用的默认大区
+	Region string
+	// 1–3 个候选大区，按顺序尝试
+	Regions []string
+	// 座位数，默认 10
+	MaxPlayers *int64
+	// 帧同步（默认）或即时转发
+	SyncMode string
+	// 帧率，默认 30；relay 时忽略
+	TickRate *int64
+	// 开局方式，默认 auto
+	StartMode string
+	// ticket（默认）凭业务签发的票据加入；open 任何用户都能加入
+	AccessMode string
+	// 最长时长，默认 3600，不超过平台上限
+	MaxDurationSeconds *int64
+	// 断线重连窗口，默认 60；0 为不等待重连
+	ReconnectWindowSeconds *int64
+	// 帧同步的状态快照（relay 不能开启）
+	Snapshot *GameRoomSnapshotParams
+	// 业务扩展字段，规范化后不超过 2KB，回调中原样带回
+	Ext json.RawMessage
+}
+
+// CloseGameRoomParams 结束游戏房间的参数（Game.CloseRoom）。
+type CloseGameRoomParams struct {
+	// 原因，写入操作日志，不给玩家看
+	Reason string
+	// 结算结果，规范化后不超过 4KB；给玩家和 game_room.closed 回调
+	Result json.RawMessage
+}
+
+// RemoveGameMemberParams 把玩家移出房间的参数（Game.RemoveMember）。
+type RemoveGameMemberParams struct {
+	// 幂等键：1–64 位字母、数字或 _ . : -
+	OperationID string
+	// 原因，写入操作日志
+	Reason string
+}
+
+// IssueGameTicketsParams 签发加入票据的参数（Game.IssueTickets）。
+type IssueGameTicketsParams struct {
+	// 必填
+	Users []GameTicketUser
+	// 有效期，默认 120
+	TTLSeconds *int64
+}
+
 // CreateGroupParams 建群（初始成员直接入群）的参数（Groups.Create）。
 type CreateGroupParams struct {
 	// 群主的用户名（必填）
@@ -446,8 +507,8 @@ type CheckTextParams struct {
 	Text string
 	// 字段名到文本
 	Fields map[string]string
-	// 是否同步调用第三方审核，默认 false
-	WithProvider bool
+	// 是否同时用智能审核检查，默认 true；为 false 时只查关键词
+	WithProvider *bool
 }
 
 // CreateWordListParams 创建词库的参数（Moderation.CreateWordList）。
@@ -764,6 +825,45 @@ func encAIDelta(w *jw, v AIDelta) {
 	encInt64(w, v.Seq)
 	w.key("ops")
 	encSlice(encAIOp)(w, v.Ops)
+	w.endObject()
+}
+
+// GameRoomSnapshotParams 帧同步的状态快照（relay 不能开启）
+type GameRoomSnapshotParams struct {
+	// 必填
+	Enabled bool
+	// 开启时默认 30
+	IntervalSeconds *int64
+}
+
+func encGameRoomSnapshotParams(w *jw, v GameRoomSnapshotParams) {
+	w.beginObject()
+	w.key("enabled")
+	encBool(w, v.Enabled)
+	if v.IntervalSeconds != nil {
+		w.key("interval_seconds")
+		encInt64(w, *v.IntervalSeconds)
+	}
+	w.endObject()
+}
+
+// GameTicketUser GameTicketUser
+type GameTicketUser struct {
+	// 必填
+	Username string
+	// 指定座位（0 到 max_players-1）；不给时加入时分配最小的空座位
+	Seat *int64
+}
+
+func encGameTicketUser(w *jw, v GameTicketUser) {
+	w.require(v.Username != "", "username")
+	w.beginObject()
+	w.key("username")
+	encStr(w, v.Username)
+	if v.Seat != nil {
+		w.key("seat")
+		encInt64(w, *v.Seat)
+	}
 	w.endObject()
 }
 

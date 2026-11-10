@@ -362,7 +362,7 @@ func TestEventSamples(t *testing.T) { // S-33
 			}
 		}
 	}
-	if len(seen) != len(callback.EventTypes) || len(callback.EventTypes) != 61 {
+	if len(seen) != len(callback.EventTypes) || len(callback.EventTypes) != 68 {
 		t.Fatalf("样本覆盖 %d 种，SDK 认识 %d 种", len(seen), len(callback.EventTypes))
 	}
 	// 截短、微秒时间、origin 为 null、不认识的事件和字段

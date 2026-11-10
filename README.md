@@ -1,14 +1,14 @@
 # DeepRespond IM 服务端 Go SDK
 
-版本 **v1.0.2**，MIT 许可证，Go **1.23 或以上**，仅依赖标准库。
+版本 **v1.0.3**，MIT 许可证，Go **1.23 或以上**，仅依赖标准库。
 
-使用应用身份调用 OpenAPI，管理用户、群组、消息、文件、聊天室、推送与音视频频道，并签发用户登录凭证。提供签名回调的校验、防重放、事件去重与处理器。
+使用应用身份调用 OpenAPI，管理用户、群组、消息、文件、聊天室、推送、音视频频道与游戏房间，并签发用户登录凭证。提供签名回调的校验、防重放、事件去重与处理器。
 模块 `github.com/DeepRespond-AI/deeprespond-im-server-go-sdk`，包名 `drim`；回调在 `callback`，模拟服务与测试辅助在 `drimtest`。
 
 ## 安装
 
 ```bash
-go get github.com/DeepRespond-AI/deeprespond-im-server-go-sdk@v1.0.2
+go get github.com/DeepRespond-AI/deeprespond-im-server-go-sdk@v1.0.3
 ```
 
 ```go
@@ -83,6 +83,24 @@ n, err := client.Media.Download(ctx, file.URL, w)
 ```
 
 不超过 32 MB 的一次上传，更大的分片并发上传；中断后可以用 `ResumeUpload(ctx, fileID, r, size, params)` 续传。
+
+## 游戏房间
+
+`client.Game` 用于游戏的业务服务端：匹配成功后建房、给每个玩家签加入票据，对局结束时带结算结果结束房间；玩家的 App 用客户端 SDK 凭票据加入。完整示例见 [examples/gameroom](examples/gameroom/main.go)。
+
+```go
+// 房间 ID 用匹配 ID：同参数重复建房返回同一房间（Created 为假），超时重试不会建出两个房间
+room, err := client.Game.CreateRoom(ctx, matchID, drim.CreateGameRoomParams{MaxPlayers: drim.Int64(2), StartMode: "all_ready"})
+if drim.IsReason(err, drim.CodeUnavailable, "game_capacity_unavailable") {
+    // 当前大区没有可用的游戏节点，稍后重试
+}
+tickets, err := client.Game.IssueTickets(ctx, matchID, drim.IssueGameTicketsParams{
+    Users: []drim.GameTicketUser{{Username: "alice"}, {Username: "bob"}},
+}) // 不自动重试：重新签发会作废旧票据，超时后直接再签一次
+res, err := client.Game.CloseRoom(ctx, matchID, drim.CloseGameRoomParams{Result: drim.JSON(`{"winner":"alice"}`)})
+```
+
+房间结束（包括到期、空房间、节点故障）时收到 `game_room.closed`，其中有每个玩家的在线时长和计费分钟数（`callback.EventHandlers.GameRoomClosed`）。
 
 ## 接收回调
 

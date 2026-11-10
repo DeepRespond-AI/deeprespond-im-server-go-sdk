@@ -3813,7 +3813,8 @@ func (s *ModerationService) Stats(ctx context.Context, params ModerationStatsPar
 //
 // text 和 fields 合计 1 到 10 项。只给 text 时服务端直接返回一个 TextCheck，否则为 {fields: {字段名: TextCheck}}（text 的键为 text）；
 // SDK 统一为 TextCheckResult（x-drim-postprocess: text_check）。
-// 不写入审核记录和违规、不计入检查的统计；with_provider 为真且这个场景开启了第三方审核时同步调用服务商（计入用量和费用），调用失败时只有词库的结果。
+// 不写入审核记录和违规、不计入检查的统计。关键词和智能审核一起检查（with_provider 默认为 true）：这个场景开启了文本审核时同步调用智能审核，
+// 计入用量和费用；智能审核没有执行时只有关键词的结果，provider_skipped 给出原因。显式传 with_provider: false 时只查关键词。
 //
 // 接口：POST /moderation/text-check（moderation.check_text）。查询，网络错误、超时、5xx 时自动重试。
 func (s *ModerationService) CheckText(ctx context.Context, params CheckTextParams) (*TextCheckResult, error) {
@@ -3831,9 +3832,9 @@ func (s *ModerationService) CheckText(ctx context.Context, params CheckTextParam
 		w.key("fields")
 		encMap(encStr)(w, params.Fields)
 	}
-	if params.WithProvider {
+	if params.WithProvider != nil {
 		w.key("with_provider")
-		encBool(w, params.WithProvider)
+		encBool(w, *params.WithProvider)
 	}
 	w.endObject()
 	out := new(TextCheckResult)
@@ -4969,4 +4970,274 @@ func (s *AIService) FinishStream(ctx context.Context, streamID string, lastSeq i
 		return nil, err
 	}
 	return out, nil
+}
+
+// GameService 游戏房间：建房、签加入票据、开局、结束、移出玩家，成员与大区（client.Game）。
+type GameService struct {
+	t *transport
+}
+
+// ListRegions 列出可以建房的大区
+//
+// 已启用的大区和是否有可调度的游戏节点；default 为应用的默认大区（应用没有设置时为平台默认大区）。
+//
+// 接口：GET /game/regions（game.list_regions）。查询，网络错误、超时、5xx 时自动重试。
+func (s *GameService) ListRegions(ctx context.Context) ([]GameRegion, error) {
+	c := s.t.newCall(&endpoints.GameListRegions)
+	var out struct {
+		Value []GameRegion `json:"items"`
+	}
+	if err := s.t.do(ctx, c, &out); err != nil {
+		return nil, err
+	}
+	return out.Value, nil
+}
+
+// ListRooms 分页列出游戏房间
+//
+// 按创建时间从新到旧；status 可以是逗号分隔的多个状态，不传时为全部；search 按房间 ID 前缀匹配。
+//
+// 接口：GET /game/rooms（game.list_rooms）。查询，网络错误、超时、5xx 时自动重试。
+func (s *GameService) ListRooms(ctx context.Context, params ListGameRoomsParams) (*Page[GameRoom], error) {
+	c := s.t.newCall(&endpoints.GameListRooms)
+	if params.Status != "" {
+		c.query("status", params.Status)
+	}
+	if params.Search != "" {
+		c.query("search", params.Search)
+	}
+	if params.Cursor != "" {
+		c.query("cursor", params.Cursor)
+	}
+	if params.Limit != 0 {
+		c.query("limit", strconv.Itoa(params.Limit))
+	}
+	out := new(Page[GameRoom])
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AllRooms 逐项遍历 ListRooms 的结果，自动翻页：按 next_cursor 是否为空判断结束，不按条数判断（一页可能为空而仍有下一页）。
+// 出错时产出这个错误后结束，已产出的项有效。
+func (s *GameService) AllRooms(ctx context.Context, params ListGameRoomsParams) iter.Seq2[GameRoom, error] {
+	return iterPages(ctx, params.Cursor, func(ctx context.Context, cursor string) ([]GameRoom, string, error) {
+		p := params
+		p.Cursor = cursor
+		page, err := s.ListRooms(ctx, p)
+		if err != nil {
+			return nil, "", err
+		}
+		return page.Items, page.NextCursor, nil
+	})
+}
+
+// CreateRoom 创建游戏房间
+//
+// 以业务的房间 ID 创建房间并分配到游戏节点。同参数重复调用返回同一房间（200，created 为假）；参数不同或房间已结束返回
+// conflict（room_id_used）。同时进行的房间数已达上限返回 limit_exceeded（open_rooms）；当前大区没有可用节点返回
+// unavailable（game_capacity_unavailable，可以稍后重试）。
+//
+// 接口：PUT /game/rooms/{room_id}（game.create_room）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *GameService) CreateRoom(ctx context.Context, roomID string, params CreateGameRoomParams) (*GameCreateRoomResult, error) {
+	c := s.t.newCall(&endpoints.GameCreateRoom)
+	c.path("room_id", roomID)
+	w := c.body()
+	w.beginObject()
+	if params.Name != "" {
+		w.key("name")
+		encStr(w, params.Name)
+	}
+	if params.Region != "" {
+		w.key("region")
+		encStr(w, params.Region)
+	}
+	if params.Regions != nil {
+		w.key("regions")
+		encSlice(encStr)(w, params.Regions)
+	}
+	if params.MaxPlayers != nil {
+		w.key("max_players")
+		encInt64(w, *params.MaxPlayers)
+	}
+	if params.SyncMode != "" {
+		w.key("sync_mode")
+		encStr(w, params.SyncMode)
+	}
+	if params.TickRate != nil {
+		w.key("tick_rate")
+		encInt64(w, *params.TickRate)
+	}
+	if params.StartMode != "" {
+		w.key("start_mode")
+		encStr(w, params.StartMode)
+	}
+	if params.AccessMode != "" {
+		w.key("access_mode")
+		encStr(w, params.AccessMode)
+	}
+	if params.MaxDurationSeconds != nil {
+		w.key("max_duration_seconds")
+		encInt64(w, *params.MaxDurationSeconds)
+	}
+	if params.ReconnectWindowSeconds != nil {
+		w.key("reconnect_window_seconds")
+		encInt64(w, *params.ReconnectWindowSeconds)
+	}
+	if params.Snapshot != nil {
+		w.key("snapshot")
+		encGameRoomSnapshotParams(w, *params.Snapshot)
+	}
+	if params.Ext != nil {
+		w.key("ext")
+		encObject(w, params.Ext)
+	}
+	w.endObject()
+	out := new(GameCreateRoomResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// GetRoom 查询游戏房间
+//
+// 接口：GET /game/rooms/{room_id}（game.get_room）。查询，网络错误、超时、5xx 时自动重试。
+func (s *GameService) GetRoom(ctx context.Context, roomID string) (*GameRoom, error) {
+	c := s.t.newCall(&endpoints.GameGetRoom)
+	c.path("room_id", roomID)
+	var out struct {
+		Value *GameRoom `json:"room"`
+	}
+	if err := s.t.do(ctx, c, &out); err != nil {
+		return nil, err
+	}
+	return out.Value, nil
+}
+
+// CloseRoom 结束游戏房间
+//
+// 把房间改为 closing 并通知游戏节点，玩家收到带 result 的结束通知；节点上报后房间变为 closed，并发出 game_room.closed 回调。
+// 首次结束 accepted 为真（202）；已在结束或已结束的返回当前房间（200），不改原因和结果。
+//
+// 接口：POST /game/rooms/{room_id}/close（game.close_room）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *GameService) CloseRoom(ctx context.Context, roomID string, params CloseGameRoomParams) (*GameCloseRoomResult, error) {
+	c := s.t.newCall(&endpoints.GameCloseRoom)
+	c.path("room_id", roomID)
+	w := c.body()
+	w.beginObject()
+	if params.Reason != "" {
+		w.key("reason")
+		encStr(w, params.Reason)
+	}
+	if params.Result != nil {
+		w.key("result")
+		encObject(w, params.Result)
+	}
+	w.endObject()
+	out := new(GameCloseRoomResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ListMembers 列出房间成员和连接状态
+//
+// 每次加入一项（同一座位换人、同一用户离开后再加入都会有多项），按加入顺序。
+//
+// 接口：GET /game/rooms/{room_id}/members（game.list_members）。查询，网络错误、超时、5xx 时自动重试。
+func (s *GameService) ListMembers(ctx context.Context, roomID string) ([]GameMember, error) {
+	c := s.t.newCall(&endpoints.GameListMembers)
+	c.path("room_id", roomID)
+	var out struct {
+		Value []GameMember `json:"items"`
+	}
+	if err := s.t.do(ctx, c, &out); err != nil {
+		return nil, err
+	}
+	return out.Value, nil
+}
+
+// RemoveMember 把玩家移出房间
+//
+// 把用户在房间里未离开的座位改为 left（removed），作废他未用的票据，游戏节点断开他的连接。用户在房间里时 removed 为真（202）；
+// 不在房间里返回 200、member 为空。同一 operation_id 的重复调用返回第一次的结果，SDK 没有给时自动生成；
+// operation_id 已用于其他操作返回 conflict（operation_id_used）。
+//
+// 接口：POST /game/rooms/{room_id}/members/{username}/remove（game.remove_member）。带幂等键的写操作，用同一个键自动重试。
+func (s *GameService) RemoveMember(ctx context.Context, roomID, username string, params RemoveGameMemberParams) (*GameRemoveMemberResult, error) {
+	c := s.t.newCall(&endpoints.GameRemoveMember)
+	c.path("room_id", roomID)
+	c.path("username", username)
+	w := c.body()
+	w.beginObject()
+	operationID := params.OperationID
+	c.checkClientMsgID(operationID)
+	if operationID == "" && !c.unsafe {
+		operationID = newClientMsgID()
+	}
+	if operationID != "" {
+		w.key("operation_id")
+		encStr(w, operationID)
+	}
+	if params.Reason != "" {
+		w.key("reason")
+		encStr(w, params.Reason)
+	}
+	w.endObject()
+	out := new(GameRemoveMemberResult)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// StartRoom 手动开局
+//
+// 只用于 start_mode 为 manual 的房间（其他房间返回 invalid_argument）；已在对局中的直接返回。房间状态在游戏节点开始推进帧后变为
+// playing（返回时可能仍是 open）。房间已结束返回 conflict（room_not_open），节点不可用返回 unavailable（game_node_unavailable）。
+//
+// 接口：POST /game/rooms/{room_id}/start（game.start_room）。本身幂等，可以自动重试；重试后得到 not_found、version_conflict 时错误的 Retried 为真。
+func (s *GameService) StartRoom(ctx context.Context, roomID string) (*GameRoom, error) {
+	c := s.t.newCall(&endpoints.GameStartRoom)
+	c.path("room_id", roomID)
+	var out struct {
+		Value *GameRoom `json:"room"`
+	}
+	if err := s.t.do(ctx, c, &out); err != nil {
+		return nil, err
+	}
+	return out.Value, nil
+}
+
+// IssueTickets 签发加入票据
+//
+// 给 1–10 个用户各签一张加入票据，交给玩家的客户端加入房间。同一用户再次签发会作废他之前未用的票据，所以超时后可以直接重新签发。
+// 用户不存在或已停用返回 invalid_argument（details.usernames）；同一批指定了重复的座位返回 invalid_argument（details.seat）；
+// 开放房间（access_mode 为 open）不需要票据，返回 invalid_argument；房间已结束返回 conflict（room_not_open）。
+//
+// 接口：POST /game/rooms/{room_id}/tickets（game.issue_tickets）。不幂等：请求发出后不自动重试（被限流的照常等待后重发），超时后先查询结果再决定是否重试。
+func (s *GameService) IssueTickets(ctx context.Context, roomID string, params IssueGameTicketsParams) ([]GameTicket, error) {
+	c := s.t.newCall(&endpoints.GameIssueTickets)
+	c.path("room_id", roomID)
+	w := c.body()
+	c.require(len(params.Users) > 0, "users")
+	c.maxItems("users", len(params.Users), 10)
+	w.beginObject()
+	w.key("users")
+	encSlice(encGameTicketUser)(w, params.Users)
+	if params.TTLSeconds != nil {
+		w.key("ttl_seconds")
+		encInt64(w, *params.TTLSeconds)
+	}
+	w.endObject()
+	var out struct {
+		Value []GameTicket `json:"tickets"`
+	}
+	if err := s.t.do(ctx, c, &out); err != nil {
+		return nil, err
+	}
+	return out.Value, nil
 }
