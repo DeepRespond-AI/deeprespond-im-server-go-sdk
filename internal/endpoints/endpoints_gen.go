@@ -500,6 +500,15 @@ var ConversationsPins = Endpoint{
 	HasResult:  true,
 }
 
+// GameGetClientConfig 查看客户端建房和游客登录的设置：GET /game/client-config
+var GameGetClientConfig = Endpoint{
+	Name:      "game.get_client_config",
+	Method:    "GET",
+	Path:      "/game/client-config",
+	Category:  Query,
+	HasResult: true,
+}
+
 // GameListRegions 列出可以建房的大区：GET /game/regions
 var GameListRegions = Endpoint{
 	Name:      "game.list_regions",
@@ -1978,6 +1987,7 @@ var All = []*Endpoint{
 	&ConversationsGet,
 	&ConversationsMessages,
 	&ConversationsPins,
+	&GameGetClientConfig,
 	&GameListRegions,
 	&GameListRooms,
 	&GameCreateRoom,

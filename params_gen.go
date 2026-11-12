@@ -174,11 +174,11 @@ type CreateGameRoomParams struct {
 	Regions []string
 	// 座位数，默认 10
 	MaxPlayers *int64
-	// 帧同步（默认）或即时转发
+	// 帧同步（默认）、即时转发或状态同步
 	SyncMode string
-	// 帧率，默认 30；relay 时忽略
+	// 帧同步的帧率，默认 20；状态同步为每秒下发次数，可选 10、15、20、30，默认 10；relay 时忽略
 	TickRate *int64
-	// 开局方式，默认 auto
+	// 开局方式，默认 auto；full 为坐满开局
 	StartMode string
 	// ticket（默认）凭业务签发的票据加入；open 任何用户都能加入
 	AccessMode string
@@ -190,6 +190,10 @@ type CreateGameRoomParams struct {
 	Snapshot *GameRoomSnapshotParams
 	// 业务扩展字段，规范化后不超过 2KB，回调中原样带回
 	Ext json.RawMessage
+	// 开局后是否还能加入新玩家，默认 true
+	LateJoin *bool
+	// 状态同步时谁能写全局状态：host（默认）只有房主，all 所有玩家；只用于 sync_mode 为 state
+	StateWrite string
 }
 
 // CloseGameRoomParams 结束游戏房间的参数（Game.CloseRoom）。

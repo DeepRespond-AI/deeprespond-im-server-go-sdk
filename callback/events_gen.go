@@ -1776,6 +1776,10 @@ type GameRoomCreated struct {
 	SyncMode   string          `json:"sync_mode"`
 	TickRate   int64           `json:"tick_rate"`
 	CreatedAt  time.Time       `json:"created_at"`
+	// server 业务服务端或控制台建的；client 玩家客户端快速匹配、建私人房间建的（origin 也为 client）
+	Source string `json:"source"`
+	// 状态同步时谁能写全局状态；不是状态同步时为空字符串
+	StateWrite string `json:"state_write"`
 }
 
 // UnmarshalJSON 解码并保存原始 JSON。
@@ -1938,7 +1942,7 @@ type GameRoomClosed struct {
 	ClosedAt  *time.Time `json:"closed_at"`
 	// 开局到结束的时长（毫秒），没有开局为 0
 	DurationMs int64 `json:"duration_ms"`
-	// G7 结束时给的结算结果
+	// G7 结束时给的结算结果；房主结束（closed_by_host）时为房主客户端上报的结果，不可信
 	Result json.RawMessage `json:"result"`
 	// 每次加入一项（含换人前的成员），按座位、加入顺序
 	Members []GameRoomClosedMember `json:"members"`

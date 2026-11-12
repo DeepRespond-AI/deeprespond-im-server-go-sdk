@@ -240,3 +240,43 @@ func sameJSON(raw json.RawMessage, want string) bool {
 	var a, b any
 	return json.Unmarshal(raw, &a) == nil && json.Unmarshal([]byte(want), &b) == nil && reflect.DeepEqual(a, b)
 }
+
+// TestGameStateSyncRooms 在真实服务上建状态同步房间：新参数能发出、服务端的新字段能解析、错误组合被拒绝；再查客户端建房的设置。
+func TestGameStateSyncRooms(t *testing.T) {
+	requireGame(t)
+	im := newClient(t)
+	ctx := context.Background()
+
+	roomID := uniq("sdk-go-state-")
+	res := must(im.Game.CreateRoom(ctx, roomID, drim.CreateGameRoomParams{MaxPlayers: drim.Int64(2), SyncMode: "state", StateWrite: "all",
+		StartMode: "full", LateJoin: drim.Bool(false)}))
+	r := res.Room
+	check(t, res.Created && r.SyncMode == "state" && r.TickRate == 10 && r.StateWrite == "all" && r.StartMode == "full" && !r.LateJoin &&
+		r.Source == "server" && r.AccessMode == "ticket" && r.Mode == nil && r.Code == nil, "状态同步建房：%+v", r)
+	got := must(im.Game.GetRoom(ctx, roomID))
+	check(t, got.SyncMode == "state" && got.StateWrite == "all" && !got.LateJoin, "GetRoom：%+v", got)
+	// 同参数重放 200（late_join=false 参与参数比较）。
+	again := must(im.Game.CreateRoom(ctx, roomID, drim.CreateGameRoomParams{MaxPlayers: drim.Int64(2), SyncMode: "state", StateWrite: "all",
+		StartMode: "full", LateJoin: drim.Bool(false)}))
+	check(t, !again.Created, "重放应返回同一房间：%+v", again.Room)
+	must(im.Game.CloseRoom(ctx, roomID, drim.CloseGameRoomParams{Reason: "sdk 联调"}))
+
+	// 默认：state_write 为 host，tick_rate 为 10，late_join 为 true；帧同步房间的 state_write 为空。
+	def := must(im.Game.CreateRoom(ctx, uniq("sdk-go-state-"), drim.CreateGameRoomParams{MaxPlayers: drim.Int64(2), SyncMode: "state"})).Room
+	check(t, def.StateWrite == "host" && def.TickRate == 10 && def.LateJoin, "状态同步默认值：%+v", def)
+	must(im.Game.CloseRoom(ctx, def.RoomID, drim.CloseGameRoomParams{}))
+	frame := must(im.Game.CreateRoom(ctx, uniq("sdk-go-frame-"), drim.CreateGameRoomParams{MaxPlayers: drim.Int64(2)})).Room
+	check(t, frame.SyncMode == "frame" && frame.StateWrite == "" && frame.Source == "server", "帧同步房间：%+v", frame)
+	must(im.Game.CloseRoom(ctx, frame.RoomID, drim.CloseGameRoomParams{}))
+
+	// state_write 只用于状态同步；状态同步不支持 60 帧。
+	_, err := im.Game.CreateRoom(ctx, uniq("sdk-go-bad-"), drim.CreateGameRoomParams{StateWrite: "all"})
+	check(t, drim.IsCode(err, "invalid_argument"), "帧同步带 state_write：%v", err)
+	_, err = im.Game.CreateRoom(ctx, uniq("sdk-go-bad-"), drim.CreateGameRoomParams{SyncMode: "state", TickRate: drim.Int64(60)})
+	check(t, drim.IsCode(err, "invalid_argument"), "状态同步 60：%v", err)
+
+	// G9：客户端建房和游客登录的设置。
+	cfg := must(im.Game.GetClientConfig(ctx))
+	check(t, cfg.MaxPlayers >= 1 && cfg.MaxDurationSeconds >= 60, "客户端设置：%+v", cfg)
+	t.Logf("客户端设置：%+v", *cfg)
+}

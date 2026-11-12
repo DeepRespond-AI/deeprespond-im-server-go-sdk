@@ -1,6 +1,6 @@
 # DeepRespond IM 服务端 Go SDK
 
-版本 **v1.0.3**，MIT 许可证，Go **1.23 或以上**，仅依赖标准库。
+版本 **v1.0.4**，MIT 许可证，Go **1.23 或以上**，仅依赖标准库。
 
 使用应用身份调用 OpenAPI，管理用户、群组、消息、文件、聊天室、推送、音视频频道与游戏房间，并签发用户登录凭证。提供签名回调的校验、防重放、事件去重与处理器。
 模块 `github.com/DeepRespond-AI/deeprespond-im-server-go-sdk`，包名 `drim`；回调在 `callback`，模拟服务与测试辅助在 `drimtest`。
@@ -8,7 +8,7 @@
 ## 安装
 
 ```bash
-go get github.com/DeepRespond-AI/deeprespond-im-server-go-sdk@v1.0.3
+go get github.com/DeepRespond-AI/deeprespond-im-server-go-sdk@v1.0.4
 ```
 
 ```go

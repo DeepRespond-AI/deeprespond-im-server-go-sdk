@@ -280,3 +280,97 @@ func newGameHandler(t *testing.T, events callback.EventHandlers) (*callback.Hand
 	}
 	return h, secret
 }
+
+// stateRoomJSON 是客户端快速匹配建的状态同步房间（免服务端接入、状态同步新增的字段）。
+const stateRoomJSON = `{"room_id":"m-7Q2K9X","name":"","status":"playing","region":"cn-east","region_name":"华东","max_players":4,
+"player_count":3,"sync_mode":"state","tick_rate":10,"start_mode":"full","access_mode":"match","max_duration_seconds":1800,
+"reconnect_window_seconds":60,"snapshot":{"enabled":false,"interval_seconds":0},"ext":{},"version":3,
+"created_at":"2026-11-12T08:00:00.000Z","started_at":"2026-11-12T08:00:20.000Z","closed_at":null,"close_reason":"","result":null,
+"source":"client","mode":"ranked","code":null,"late_join":false,"state_write":"all"}`
+
+func TestGameStateSyncRoom(t *testing.T) {
+	srv := newServer(t)
+	client := newClient(t, srv)
+	ctx := context.Background()
+
+	// 业务服务端建状态同步房间：sync_mode、state_write、late_join=false 都要发出（false 不能被当成没给）。
+	srv.Respond("game.create_room", 201, roomBody(gameRoomJSON))
+	_, err := client.Game.CreateRoom(ctx, "s-1", drim.CreateGameRoomParams{SyncMode: "state", StateWrite: "all", StartMode: "full",
+		LateJoin: drim.Bool(false), TickRate: drim.Int64(15)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := srv.Calls("game.create_room")[0].JSON()
+	if body["sync_mode"] != "state" || body["state_write"] != "all" || body["start_mode"] != "full" || body["late_join"] != false || body["tick_rate"] != float64(15) {
+		t.Fatalf("请求体：%v", body)
+	}
+	// 不给 late_join、state_write 时不发送，用服务端默认值。
+	srv.Respond("game.create_room", 201, roomBody(gameRoomJSON))
+	if _, err = client.Game.CreateRoom(ctx, "s-2", drim.CreateGameRoomParams{SyncMode: "state"}); err != nil {
+		t.Fatal(err)
+	}
+	if body := srv.Calls("game.create_room")[1].JSON(); body["late_join"] != nil || body["state_write"] != nil {
+		t.Fatalf("没给的参数不应发送：%v", body)
+	}
+
+	// 读客户端建的房间：新字段都能解析。
+	srv.Respond("game.get_room", 200, roomBody(stateRoomJSON))
+	room, err := client.Game.GetRoom(ctx, "m-7Q2K9X")
+	if err != nil || room.SyncMode != "state" || room.Source != "client" || room.AccessMode != "match" || room.StateWrite != "all" ||
+		room.LateJoin || room.Mode == nil || *room.Mode != "ranked" || room.Code != nil || room.StartMode != "full" {
+		t.Fatalf("GetRoom：%v %+v", err, room)
+	}
+
+	// G9：客户端建房和游客登录的设置。
+	srv.Respond("game.get_client_config", 200, `{"guest_login":true,"client_rooms":true,"max_players":4,"max_duration_seconds":1800}`)
+	cfg, err := client.Game.GetClientConfig(ctx)
+	if err != nil || !cfg.GuestLogin || !cfg.ClientRooms || cfg.MaxPlayers != 4 || cfg.MaxDurationSeconds != 1800 {
+		t.Fatalf("GetClientConfig：%v %+v", err, cfg)
+	}
+	if c := srv.Calls("game.get_client_config")[0]; c.Method != "GET" || c.Path != "/game/client-config" {
+		t.Fatalf("请求：%s %s", c.Method, c.Path)
+	}
+}
+
+func TestGameClosedByHostCallback(t *testing.T) {
+	var closed *callback.GameRoomClosed
+	var created *callback.GameRoomCreated
+	h, secret := newGameHandler(t, callback.EventHandlers{
+		GameRoomClosed: func(ctx context.Context, ev *callback.Event, d *callback.GameRoomClosed) error {
+			closed = d
+			return nil
+		},
+		GameRoomCreated: func(ctx context.Context, ev *callback.Event, d *callback.GameRoomCreated) error {
+			created = d
+			return nil
+		},
+	})
+	send := func(name string, edit func(string) string) {
+		raw, err := os.ReadFile(filepath.Join("testdata", "events", name+".json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, drimtest.SignedRequest("1840200000000000007", []byte(edit(string(raw))), secret))
+		if rec.Code != 204 {
+			t.Fatalf("%s：%d %s", name, rec.Code, rec.Body)
+		}
+	}
+	send("game_room.closed", func(s string) string {
+		s = strings.Replace(s, `"close_reason":"closed_by_server"`, `"close_reason":"closed_by_host"`, 1)
+		s = strings.Replace(s, `"id":"`, `"id":"9`, 1)
+		return s
+	})
+	send("game_room.created", func(s string) string {
+		s = strings.Replace(s, `"sync_mode":"frame","tick_rate":30`, `"sync_mode":"state","tick_rate":10`, 1)
+		s = strings.Replace(s, `"source":"server","state_write":""`, `"source":"client","state_write":"all"`, 1)
+		return strings.Replace(s, `"origin":"server"`, `"origin":"client"`, 1)
+	})
+	if closed == nil || closed.CloseReason != "closed_by_host" || len(closed.Result) == 0 {
+		t.Fatalf("房主结束：%+v", closed)
+	}
+	if created == nil || created.SyncMode != "state" || created.TickRate != 10 || created.Origin == nil || *created.Origin != "client" ||
+		created.Source != "client" || created.StateWrite != "all" {
+		t.Fatalf("状态同步建房回调：%+v", created)
+	}
+}

@@ -4977,6 +4977,20 @@ type GameService struct {
 	t *transport
 }
 
+// GetClientConfig 查看客户端建房和游客登录的设置
+//
+// 租户在控制台打开的「客户端建房」和「游客登录」，以及客户端建房实际生效的每局人数和最长时长（已按套餐和平台上限取小）。
+//
+// 接口：GET /game/client-config（game.get_client_config）。查询，网络错误、超时、5xx 时自动重试。
+func (s *GameService) GetClientConfig(ctx context.Context) (*GameClientConfig, error) {
+	c := s.t.newCall(&endpoints.GameGetClientConfig)
+	out := new(GameClientConfig)
+	if err := s.t.do(ctx, c, out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ListRegions 列出可以建房的大区
 //
 // 已启用的大区和是否有可调度的游戏节点；default 为应用的默认大区（应用没有设置时为平台默认大区）。
@@ -5092,6 +5106,14 @@ func (s *GameService) CreateRoom(ctx context.Context, roomID string, params Crea
 	if params.Ext != nil {
 		w.key("ext")
 		encObject(w, params.Ext)
+	}
+	if params.LateJoin != nil {
+		w.key("late_join")
+		encBool(w, *params.LateJoin)
+	}
+	if params.StateWrite != "" {
+		w.key("state_write")
+		encStr(w, params.StateWrite)
 	}
 	w.endObject()
 	out := new(GameCreateRoomResult)

@@ -1185,6 +1185,30 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// GameClientConfig 客户端建房和游客登录的设置
+type GameClientConfig struct {
+	// 是否允许游客登录
+	GuestLogin bool `json:"guest_login"`
+	// 是否允许客户端快速匹配和建私人房间
+	ClientRooms bool `json:"client_rooms"`
+	// 客户端建房的每局人数上限（生效值）
+	MaxPlayers int64 `json:"max_players"`
+	// 客户端建的房间的最长时长（生效值）
+	MaxDurationSeconds int64 `json:"max_duration_seconds"`
+	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
+	Raw json.RawMessage `json:"-"`
+}
+
+// UnmarshalJSON 解码并保存原始 JSON。
+func (v *GameClientConfig) UnmarshalJSON(b []byte) error {
+	type plain GameClientConfig
+	if err := json.Unmarshal(b, (*plain)(v)); err != nil {
+		return err
+	}
+	v.Raw = cloneRaw(b)
+	return nil
+}
+
 // GameRegion 可以建房的大区
 type GameRegion struct {
 	Region string `json:"region"`
@@ -1236,9 +1260,10 @@ type GameRoom struct {
 	// 当前在座的人数
 	PlayerCount int64  `json:"player_count"`
 	SyncMode    string `json:"sync_mode"`
-	// 帧率；relay 为 0
-	TickRate               int64            `json:"tick_rate"`
-	StartMode              string           `json:"start_mode"`
+	// 帧率（状态同步为每秒下发次数）；relay 为 0
+	TickRate  int64  `json:"tick_rate"`
+	StartMode string `json:"start_mode"`
+	// match 为客户端快速匹配建的房间
 	AccessMode             string           `json:"access_mode"`
 	MaxDurationSeconds     int64            `json:"max_duration_seconds"`
 	ReconnectWindowSeconds int64            `json:"reconnect_window_seconds"`
@@ -1251,8 +1276,18 @@ type GameRoom struct {
 	ClosedAt  *time.Time `json:"closed_at"`
 	// 结束原因（closing 时已有）；没有结束时为空字符串
 	CloseReason string `json:"close_reason"`
-	// 结束时的结算结果
+	// 结束时的结算结果；房主结束（closed_by_host）时为房主客户端上报的结果，不可信
 	Result json.RawMessage `json:"result"`
+	// server 业务服务端创建；client 玩家客户端快速匹配或建私人房间创建
+	Source string `json:"source"`
+	// 快速匹配的分组；不是快速匹配建的为 null
+	Mode *string `json:"mode"`
+	// 私人房间的房间号；其他房间为 null
+	Code *string `json:"code"`
+	// 开局后是否还能加入新玩家
+	LateJoin bool `json:"late_join"`
+	// 状态同步时谁能写全局状态；不是状态同步时为空字符串
+	StateWrite string `json:"state_write"`
 	// Raw 服务端返回的这个对象的原始 JSON；服务端新增的字段可以从中读取。
 	Raw json.RawMessage `json:"-"`
 }

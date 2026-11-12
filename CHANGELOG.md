@@ -1,5 +1,13 @@
 # 更新记录
 
+## v1.0.4 — 2026-11-12
+
+- `CreateGameRoomParams` 新增状态同步：`SyncMode: "state"`、`StateWrite`（`host` 只有房主写，默认；`all` 所有玩家写）；`StartMode: "full"` 坐满开局；`LateJoin`（`*bool`，`drim.Bool(false)` 为开局后不再加人）。
+- `GameRoom` 新增 `Source`（`server` / `client`）、`Mode`、`Code`、`LateJoin`、`StateWrite`；`AccessMode` 可能为 `match`，`CloseReason` 可能为 `closed_by_host`（`Result` 是房主上报的，发奖前请核对）。
+- 新增 `client.Game.GetClientConfig`：查看应用的游客登录、客户端建房开关和客户端建房的生效限制。
+- 回调 `GameRoomCreated` 新增 `Source`、`StateWrite`；玩家建的房间、房主结束的房间 `Origin` 为 `client`。
+- SDK User-Agent 版本为 1.0.4。
+
 ## v1.0.3 — 2026-11-10
 
 - 新增游戏房间 `client.Game`：`ListRegions`、`CreateRoom`、`GetRoom`、`ListRooms` / `AllRooms`、`ListMembers`、`IssueTickets`、`StartRoom`、`CloseRoom`、`RemoveMember`。建房、开局、结束自动重试；签票据不自动重试；移出玩家没有给 `OperationID` 时自动生成，重试时不变。结果中的 `Created`、`Accepted`、`Removed` 由状态码得出。
